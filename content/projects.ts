@@ -1,0 +1,26 @@
+import type { Project } from "@/types";
+
+export const projects: Project[] = [
+  {
+    name: "PkmnIndx",
+    description:
+      "Created a social media platform that automatically generates videos based on Pokemon sets and current market trends daily. Ready to upload for Tiktok, Instagram, and Youtube Shorts.",
+    tags: ["React", "Remotion", "github-actions", "apis"],
+    featured: true,
+    github: "https://github.com/mercillo/cardIndx-pipeline",
+  },
+  {
+    name: "DJ Song Requester",
+    description:
+      "It's hard to hear other people when they try to request songs. Have them scan a QR code to request a song for you to play!",
+    tags: ["Node", "Postgres"],
+  },
+  {
+    name: "Homebot",
+    description:
+      "A discordbot for your Home. Be able to assign chores, tasks to users and shopping lists for your home.",
+    tags: ["Python", "Shell", "Discord"],
+    github: "https://github.com/mercillo/homeBot",
+    featured: false,
+  },
+];
