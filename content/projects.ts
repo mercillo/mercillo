@@ -13,7 +13,9 @@ export const projects: Project[] = [
     name: "DJ Song Requester",
     description:
       "It's hard to hear other people when they try to request songs. Have them scan a QR code to request a song for you to play!",
-    tags: ["Node", "Postgres"],
+    tags: ["Next.js", "TypeScript", "Supabase"],
+    github: "https://github.com/mercillo/songRequester",
+    live: "https://request.mercillo.com",
   },
   {
     name: "Homebot",

@@ -23,7 +23,18 @@ export default function Projects() {
                 </p>
               )}
               <h3 className="text-lg font-medium text-foreground">
-                {project.name}
+                {project.live ? (
+                  <a
+                    href={project.live}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="transition-colors hover:text-accent"
+                  >
+                    {project.name} ↗
+                  </a>
+                ) : (
+                  project.name
+                )}
               </h3>
               <p className="mt-2 text-sm text-muted">{project.description}</p>
               <ul className="mt-4 flex flex-wrap gap-2">

@@ -1,45 +1,34 @@
-# mercillo.com
+# Hi, I'm Marlon
 
-Personal portfolio for Marlon ercillo — software engineer and DJ based in San Diego.
+Software engineer and DJ based in San Diego. I like building the tools other
+engineers build with.
 
-**Live:** [mercillo.com](https://mercillo.com)
+This repo is my personal site, [mercillo.com](https://mercillo.com).
 
-## About
+## What I'm building
 
-A single-page portfolio built around a DJ-booth concept: an interactive mixer
-that crossfades between the "software engineer by day" and "DJ by night" sides
-as you scroll, with spinning turntables and channel faders that follow along.
-Below the booth are career history, projects, and contact.
+- [mercillo.com](https://mercillo.com) — my portfolio, built around a DJ-booth
+  concept: an interactive mixer that crossfades between my engineer and DJ sides
+  as you scroll. (This repo.)
+- [DJ Song Requester](https://request.mercillo.com) — a live song-request app
+  for my sets. Guests scan a QR code and requests hit my phone.
+  [Code](https://github.com/mercillo/songRequester)
+- [cardIndx](https://github.com/mercillo/cardIndx-pipeline) — an automated
+  pipeline that generates daily trading-card videos for TikTok, Instagram, and
+  YouTube Shorts from set data and market trends.
+
+## Open source
+
+I helped open-source and contribute to
+[Player UI](https://github.com/player-ui), a server-driven UI engine that runs
+across web, iOS, and Android.
 
 ## Tech
 
-- [Next.js](https://nextjs.org) (App Router) + TypeScript
-- Tailwind CSS v4 with a small custom design-token system
-- Deployed on [Vercel](https://vercel.com)
+Next.js, TypeScript, Tailwind CSS, Supabase, deployed on Vercel.
 
-## Highlights
+## Find me
 
-- Scroll-driven crossfader built on a custom `useScrollSpy` hook — no animation library
-- Every animation respects `prefers-reduced-motion`
-- Content and presentation kept separate (`content/` data, `types/` shared types, `components/` UI)
-- Accessible by default: semantic headings, skip link, visible focus rings, WCAG AA contrast
-
-## Run locally
-
-```bash
-npm install
-npm run dev
-```
-
-Then open [http://localhost:3000](http://localhost:3000).
-
-## Structure
-
-```
-app/          routes, layout, global styles
-components/    UI — layout and page sections
-content/       site data (career, projects, contact, nav)
-types/         shared domain types
-lib/           hooks and helpers
-public/        static assets
-```
+- LinkedIn: [in/mercillo](https://linkedin.com/in/mercillo)
+- SoundCloud: [marky-ercillo](https://soundcloud.com/marky-ercillo)
+- Email: mercillo729@gmail.com

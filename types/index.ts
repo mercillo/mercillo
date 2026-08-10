@@ -13,6 +13,7 @@ export type Project = {
   tags: string[];
   featured?: boolean;
   github?: string;
+  live?: string;
 };
 
 export type ContactLink = {
