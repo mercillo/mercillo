@@ -4,9 +4,9 @@ export default function Projects() {
   return (
     <section id="projects" className="scroll-mt-20 border-t border-line py-24">
       <div className="mx-auto max-w-5xl px-6">
-        <p className="text-xs tracking-[0.2em] text-subtle">02 — PROJECTS</p>
+        <p className="text-xs tracking-[0.2em] text-subtle">02</p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          Things I&apos;ve built.
+          Projects
         </h2>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
