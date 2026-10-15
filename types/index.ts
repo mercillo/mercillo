@@ -25,3 +25,30 @@ export type NavLink = {
   label: string;
   href: string;
 };
+
+export type Course = {
+  slug: string;
+  title: string;
+  lectures: LectureSummary[];
+};
+
+export type LectureSummary = {
+  slug: string;
+  title: string;
+};
+
+export type Lecture = LectureSummary & {
+  markdown: string;
+};
+
+export type QuizQuestion = {
+  prompt: string;
+  options: string[];
+  answerIndex: number;
+  explanation?: string;
+};
+
+export type Quiz = {
+  content: QuizQuestion[];
+  terms: QuizQuestion[];
+};
