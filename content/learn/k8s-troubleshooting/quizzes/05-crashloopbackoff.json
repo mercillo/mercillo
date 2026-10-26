@@ -1,0 +1,190 @@
+{
+  "sections": [
+    {
+      "title": "Walk the flowchart",
+      "intro": "A deploy of `orders-api` just went out and the pods won't stay up. Narrow it down from what kubelet recorded, not from guesses.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "What does this output already prove, before you read a single log?",
+          "snippet": "NAME              READY   STATUS             RESTARTS      AGE\norders-api-6f9-q   0/1     CrashLoopBackOff   4 (50s ago)   3m",
+          "options": [
+            "The readiness probe is keeping it out",
+            "It started at least once and exited — a crash problem",
+            "The image couldn't be pulled to the node",
+            "The scheduler couldn't place the pod"
+          ],
+          "answerIndex": 1,
+          "explanation": "RESTARTS > 0 is proof that it ran. That rules out every scheduler, image, and config-resolution cause from file 01."
+        },
+        {
+          "prompt": "In `kubectl describe pod`, which detail splits this problem in half, and how?",
+          "options": [
+            "Which node the pod was placed on",
+            "How long it ran — the `Started` to `Finished` gap",
+            "The image digest the node actually pulled",
+            "Which labels the ReplicaSet added"
+          ],
+          "answerIndex": 1,
+          "explanation": "One number from data you already have. Immediate deaths mean the app never finished starting: bad command, missing config. Delayed deaths mean it started fine and something happened later: memory, probes, a specific event."
+        },
+        {
+          "prompt": "Here's what you find. Which branch, and what's the next command?",
+          "snippet": "Last State:  Terminated\n  Reason:    Error\n  Exit Code: 1\n  Started:   Sat, 25 Oct 2026 09:14:02\n  Finished:  Sat, 25 Oct 2026 09:14:03",
+          "options": [
+            "After a while — check memory usage",
+            "After a while — tune the liveness probe",
+            "Immediate — `kubectl logs <pod>`, no flag",
+            "Immediate — `kubectl logs <pod> --previous`"
+          ],
+          "answerIndex": 3,
+          "explanation": "One second of runtime and exit 1 means the app errored during startup. `--previous` matters: without it you get the *current* container, which may have just started and printed nothing yet."
+        },
+        {
+          "prompt": "The previous logs say this. What's your diagnosis, and what do you check in the deploy?",
+          "snippet": "Error: required environment variable DATABASE_URL is not set\n    at loadConfig (/app/config.js:12)",
+          "options": [
+            "Code and config were rolled out out of sync",
+            "The image layers are corrupt",
+            "The database is down for maintenance",
+            "The node is out of memory"
+          ],
+          "answerIndex": 0,
+          "explanation": "The app says what's wrong in plain words. \"Just went out\" plus a config error almost always means the code and its config were rolled out out of sync."
+        },
+        {
+          "prompt": "Fixed. A week later the pods crash again, but differently. Which branch is this, and what does 137 mean?",
+          "snippet": "Last State:  Terminated\n  Reason:    OOMKilled\n  Exit Code: 137\n  Started:   09:00:11\n  Finished:  09:47:52",
+          "options": [
+            "Neither — the node rebooted underneath it",
+            "After a while — the liveness probe killed it",
+            "Immediate — a startup bug in the new build",
+            "After a while — it hit its memory limit (SIGKILL)"
+          ],
+          "answerIndex": 3,
+          "explanation": "47 minutes of runtime puts this in the resource/runtime branch. The Reason field is what separates an OOM kill from any other SIGKILL. Exit 137 on its own isn't enough."
+        },
+        {
+          "prompt": "Your teammate suggests doubling the memory limit. What do you want to know first?",
+          "options": [
+            "Is usage leaking upward, or steady just above the limit?",
+            "Is the pod's restartPolicy set to Always?",
+            "Is the image tag the latest release?",
+            "Is the node's CPU saturated right now?"
+          ],
+          "answerIndex": 0,
+          "explanation": "`kubectl top pod` over time, or your metrics dashboards, shows the trend. A higher limit with a leak behind it just crashes later and squeezes everything else on the node in the meantime."
+        },
+        {
+          "prompt": "Another service's pods restart about 40 seconds after every start, forever. There's no OOM, and the logs show it's still booting when it dies. Events show this. What's the real fix?",
+          "snippet": "Warning  Unhealthy  kubelet  Liveness probe failed: Get \"http://10.1.2.3:8080/healthz\": connection refused\nNormal   Killing    kubelet  Container billing failed liveness probe, will be restarted",
+          "options": [
+            "Raise the memory limit so it boots faster",
+            "Remove the liveness probe entirely",
+            "Add a `startupProbe` so liveness waits for boot",
+            "Set `restartPolicy: Never` on the Deployment"
+          ],
+          "answerIndex": 2,
+          "explanation": "kubelet is doing the killing, not the app. Removing the probe would also stop it from catching real hangs later, and a Deployment can't use `restartPolicy: Never` anyway. The startupProbe is built for exactly this case."
+        },
+        {
+          "prompt": "Last check before you sign off: a `nightly-export` pod shows exit code 0, Reason `Completed`, and keeps restarting. Bug in the app?",
+          "options": [
+            "Yes — exit 0 here means it was killed",
+            "No — the liveness probe is misconfigured",
+            "No — it succeeded; it belongs in a Job",
+            "Yes — a service shouldn't ever exit"
+          ],
+          "answerIndex": 2,
+          "explanation": "Nothing failed, so there's no bug to chase. The fix is a design change: move it to a Job, which allows `OnFailure`/`Never`."
+        }
+      ]
+    },
+    {
+      "title": "Read the signal",
+      "intro": "Each one stands alone. Read the exit code or event, and say what it means.",
+      "questions": [
+        {
+          "prompt": "The pod spec is `command: [\"sh\", \"-c\", \"start-server --port 8080\"]`. What happened?",
+          "snippet": "Exit Code: 127\n$ kubectl logs api --previous\nsh: start-server: not found",
+          "options": [
+            "Port 8080 is already taken in the pod",
+            "The image doesn't contain `sh` at all",
+            "The container ran out of memory",
+            "`start-server` isn't on the shell's PATH"
+          ],
+          "answerIndex": 3,
+          "explanation": "127 means a shell was involved and couldn't find what it was told to run. If `sh` itself were missing, the runtime would fail before anything ran (CreateContainerError / StartError), not with 127."
+        },
+        {
+          "prompt": "The file definitely exists in the image. Why might exec still say \"no such file\"?",
+          "snippet": "exec /app/start.sh: no such file or directory",
+          "options": [
+            "Its permissions aren't executable",
+            "Its interpreter is missing (shebang or CRLF)",
+            "It's in the wrong directory in the image",
+            "The node's disk is full"
+          ],
+          "answerIndex": 1,
+          "explanation": "The kernel reports the missing shebang interpreter as if the script itself were missing. Its cousin `exec format error` means an image built for the wrong CPU architecture."
+        },
+        {
+          "prompt": "Exit code 137, but `Reason: Error`, not OOMKilled. What killed it?",
+          "options": [
+            "The app called exit(137) itself",
+            "A non-OOM SIGKILL — often a liveness restart",
+            "A network timeout inside the app",
+            "An OOM kill — 137 always means memory"
+          ],
+          "answerIndex": 1,
+          "explanation": "Exit codes above 128 mean \"killed by signal (code − 128)\". 137 is SIGKILL from any source. 143 (SIGTERM) means the app shut down cleanly when asked."
+        },
+        {
+          "prompt": "A pod shows `READY 0/1`, `RESTARTS 0`, and its readiness probe is failing. Is this CrashLoopBackOff territory?",
+          "options": [
+            "No — readiness never restarts anything",
+            "Yes — the probe will restart it soon",
+            "Yes — readiness and liveness act the same",
+            "No — it's actually still Pending"
+          ],
+          "answerIndex": 0,
+          "explanation": "Only liveness failures restart a container. If RESTARTS isn't climbing, readiness is the more likely issue. Find out what the readiness endpoint is waiting on."
+        },
+        {
+          "prompt": "STATUS is `CreateContainerError` with RESTARTS 0. Does it belong in this file?",
+          "snippet": "Warning  Failed  kubelet  Error: failed to create containerd task: exec: \"/app/server\": executable file not found in $PATH",
+          "options": [
+            "Not really — RESTARTS 0 means it never ran",
+            "No — it's a liveness probe problem",
+            "Yes — it's crashing on every start",
+            "Yes — it's an out-of-memory loop"
+          ],
+          "answerIndex": 0,
+          "explanation": "The RESTARTS rule decides which file you're in. The fix is still to correct `command`/`args` or the image, but you'd never find this in `--previous` logs, because there aren't any."
+        },
+        {
+          "prompt": "A pod has been crashing for an hour, but it seems to restart only every few minutes now. Did it get better?",
+          "options": [
+            "No — that's the backoff, capped at 5 minutes",
+            "No — the scheduler is delaying restarts",
+            "Yes — the crashes are getting rarer",
+            "No — the node is throttling its CPU"
+          ],
+          "answerIndex": 0,
+          "explanation": "The \"BackOff\" in CrashLoopBackOff is the waiting between attempts. The crash itself hasn't changed. Check `--previous` for the most recent death."
+        },
+        {
+          "prompt": "A Job's pod failed three times and then stopped retrying. Is something broken?",
+          "options": [
+            "Not necessarily — Jobs stop at `backoffLimit`",
+            "Yes — the controller-manager is down",
+            "Yes — it ran out of namespace quota",
+            "Yes — it should restart like a Deployment"
+          ],
+          "answerIndex": 0,
+          "explanation": "Jobs and Deployments handle restarts differently. A Job giving up is correct behavior; a Deployment never gives up."
+        }
+      ]
+    }
+  ]
+}

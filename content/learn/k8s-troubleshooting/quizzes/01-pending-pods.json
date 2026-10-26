@@ -1,0 +1,202 @@
+{
+  "sections": [
+    {
+      "title": "Walk the flowchart",
+      "intro": "A teammate pings you: \"my new `checkout` pod has been stuck for five minutes.\" Work it the way you would live — one observation, one decision at a time.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "You run `kubectl get pods`. Before anything else, which column narrows the problem the most, and why?",
+          "snippet": "NAME       READY   STATUS    RESTARTS   AGE\ncheckout   0/1     Pending   0          5m",
+          "options": [
+            "AGE — five minutes means the scheduler gave up",
+            "STATUS — Pending means the cluster is out of capacity",
+            "READY — 0/1 means the readiness probe is failing",
+            "RESTARTS — 0 means no container has ever started"
+          ],
+          "answerIndex": 3,
+          "explanation": "A restart can only happen after a container started and exited. Zero restarts means the problem is before or during container start, not after. READY 0/1 is true of every pod that hasn't started, so it tells you nothing yet, and Pending has many causes besides capacity."
+        },
+        {
+          "prompt": "Nothing has run yet. What single question splits the rest of the search in half?",
+          "options": [
+            "Has the pod been assigned a node (`spec.nodeName`)?",
+            "Is kube-proxy healthy on the node it's on?",
+            "Is the namespace over its ResourceQuota?",
+            "Does the image tag actually exist in the registry?"
+          ],
+          "answerIndex": 0,
+          "explanation": "The scheduler's job ends the moment it writes a node name into the pod. No node means a scheduler-side problem; a node means kubelet on that node is stuck. Checking the image first is a guess, since you'd only care about images once a node is trying to pull one."
+        },
+        {
+          "prompt": "`kubectl describe pod checkout` shows `Node: <none>`. Whose logic do you now reason about, and where does it explain itself?",
+          "options": [
+            "kubelet — `journalctl -u kubelet` on the node",
+            "The scheduler — its FailedScheduling event on the pod",
+            "The runtime — `crictl ps` on the node",
+            "kube-proxy — the pod has no network yet"
+          ],
+          "answerIndex": 1,
+          "explanation": "With no node assigned, kubelet and the runtime have never seen this pod, so there's nothing on any node to read. The scheduler is the only component that has tried, and it reports why in the pod's Events."
+        },
+        {
+          "prompt": "The Events section shows this. What does the wording tell you, and what's your first check?",
+          "snippet": "Warning  FailedScheduling  60s  default-scheduler  0/3 nodes are available: 3 Insufficient memory.",
+          "options": [
+            "Compare the pod's memory request to what nodes have left",
+            "Check `kubectl get nodes` — a node is NotReady",
+            "Compare taints and tolerations — memory is a taint",
+            "Raise `limits.memory` — the pod hit its limit"
+          ],
+          "answerIndex": 0,
+          "explanation": "The scheduler compares *requests* against a node's allocatable capacity minus what's already requested. It never looks at limits, and it never looks at live usage. `kubectl describe node` (the Allocated resources section) shows that math. Raising the limit changes nothing about where the pod can be placed."
+        },
+        {
+          "prompt": "The checkout pod requests `memory: 8Gi`. Your teammate admits they copied that from another service and the app actually uses about 600Mi. What do you recommend, and what's the risk?",
+          "options": [
+            "Add a node — it's always the safe choice",
+            "Remove the request entirely so it fits anywhere",
+            "Lower the request to near real usage; risk is eviction",
+            "Add a toleration so it can use reserved nodes"
+          ],
+          "answerIndex": 2,
+          "explanation": "Lowering a padded request is the cheap fix, but only if the padding is real. That's why you confirm usage first. Removing the request makes the pod BestEffort, the first thing evicted. A toleration doesn't help, because the event never mentioned taints."
+        },
+        {
+          "prompt": "A week later the same symptom shows up, with the same message repeating. The cluster has an autoscaler that should add nodes. What's different now?",
+          "snippet": "Warning  FailedScheduling  6m (x14 over 6m)  default-scheduler  0/3 nodes are available: 3 Insufficient cpu.\nNormal   NotTriggerScaleUp 6m  cluster-autoscaler  pod didn't trigger scale-up: 1 max node group size reached",
+          "options": [
+            "The autoscaler refused — the node group is at max size",
+            "etcd is too slow to register the new nodes",
+            "The scheduler is stuck — restart kube-scheduler",
+            "The pod's requests are padded again — lower them"
+          ],
+          "answerIndex": 0,
+          "explanation": "The repetition is the signal: the same correct complaint, no new node. The autoscaler is a separate component and wrote its own event explaining why. Raising the max size is the fix, and the tradeoff is a higher cost ceiling."
+        },
+        {
+          "prompt": "Different pod, different day: `Node: node-2` is set, and STATUS reads `CreateContainerConfigError`. Which part of the system do you now suspect, and what's the likely cause?",
+          "options": [
+            "kubelet — a referenced ConfigMap or Secret is missing",
+            "The app — it's crashing during startup",
+            "The registry — the image pull is failing",
+            "The scheduler — it picked a node that can't run it"
+          ],
+          "answerIndex": 0,
+          "explanation": "Once a node is set, the scheduler is done. CreateContainerConfigError happens before the runtime is even invoked: kubelet resolves env/volume references first, and one is missing. The app hasn't run, which is why RESTARTS is still 0."
+        },
+        {
+          "prompt": "Last sanity check before you commit to a diagnosis: a pod that was Running fine an hour ago, with no spec change, now has a fresh copy sitting in Pending. What should you look at first?",
+          "options": [
+            "Node health — the old node went NotReady",
+            "The image tag — it was retagged upstream",
+            "The init containers — one is now hanging",
+            "The pod's tolerations — they were changed"
+          ],
+          "answerIndex": 0,
+          "explanation": "If nothing about the pod changed, the pod probably isn't the problem. A NotReady node causes eviction after about 5 minutes, and the replacement looks exactly like an ordinary scheduling failure. `kubectl get nodes` takes two seconds and saves you from debugging the wrong thing."
+        }
+      ]
+    },
+    {
+      "title": "Read the signal",
+      "intro": "Each one stands alone. Name what the output points at, and why.",
+      "questions": [
+        {
+          "prompt": "What is this telling you?",
+          "snippet": "0/3 nodes are available: 3 node(s) had untolerated taint {dedicated: gpu-only}.",
+          "options": [
+            "The nodes have run out of GPUs to allocate",
+            "The GPU device plugin isn't installed",
+            "Pods without a toleration for that taint are kept off",
+            "The nodes are missing a `dedicated=gpu-only` label"
+          ],
+          "answerIndex": 2,
+          "explanation": "Taints are an intentional repel mechanism. The real question is whether this pod belongs on a GPU node at all. Adding a toleration to a general workload just lets it steal the capacity the taint was protecting."
+        },
+        {
+          "prompt": "The pod uses a PVC, and the cluster spans three zones. Why can't the scheduler place it?",
+          "snippet": "0/3 nodes are available: 3 node(s) had volume node affinity conflict.",
+          "options": [
+            "The volume's backing disk is full",
+            "The PV is pinned to a zone with no node that fits the pod",
+            "The PVC was never created in this namespace",
+            "`WaitForFirstConsumer` binding always causes this"
+          ],
+          "answerIndex": 1,
+          "explanation": "Storage made its placement decision first, through `Immediate` binding or a pre-made PV, and now the pod has to follow the disk. `WaitForFirstConsumer` is the usual fix: it delays provisioning until the scheduler has picked a node."
+        },
+        {
+          "prompt": "A pod has sat in Pending for 10 minutes and `describe` shows this. Why is silence the interesting part?",
+          "snippet": "Events:  <none>",
+          "options": [
+            "It's waiting on an image pull that hasn't started",
+            "The scheduler never picked it up — so check what's skipping it",
+            "Events expire quickly, so the silence means nothing",
+            "It's over quota, which doesn't produce events"
+          ],
+          "answerIndex": 1,
+          "explanation": "Silence is information. Check `.spec.schedulerName` and `.spec.schedulingGates` first. If every new pod in the cluster shows this, it's the scheduler component itself (file 03)."
+        },
+        {
+          "prompt": "STATUS shows `Init:1/2`. Where do you look?",
+          "options": [
+            "The second init container's logs (`-c <name>`)",
+            "The previous container's logs (`--previous`)",
+            "The scheduler's logs in kube-system",
+            "The main container's logs (`kubectl logs checkout`)"
+          ],
+          "answerIndex": 0,
+          "explanation": "Init containers run strictly in order, and the main container doesn't exist until they all finish, so its logs are empty. 1/2 means one is done and the second is the blocker. A hang usually means it's waiting on a dependency that isn't up yet."
+        },
+        {
+          "prompt": "A pod rescheduled after its old node died. Which layer is stuck?",
+          "snippet": "STATUS: ContainerCreating\nWarning  FailedAttachVolume  attachdetach-controller  Multi-Attach error for volume \"pvc-abc123\" Volume is already exclusively attached to one node and can't be attached to another",
+          "options": [
+            "Scheduling — the scheduler picked the wrong zone",
+            "Storage — the RWO volume is still attached to the old node",
+            "Networking — the CNI can't assign an IP",
+            "The registry — the image is too large to pull"
+          ],
+          "answerIndex": 1,
+          "explanation": "Attach (to the node) and mount (into the pod) are separate steps. This one failed at attach because the old attachment wasn't released. `kubectl get volumeattachment` shows which node still holds it."
+        },
+        {
+          "prompt": "The node is assigned and the image exists. What failed?",
+          "snippet": "Warning  FailedCreatePodSandBox  kubelet  Failed to create pod sandbox: plugin type=\"calico\" failed: no IP addresses available in range",
+          "options": [
+            "kube-proxy — Service rules weren't programmed",
+            "DNS — the pod can't resolve the registry",
+            "The app — it crashed before binding a port",
+            "CNI — the node's pod IP range is used up"
+          ],
+          "answerIndex": 3,
+          "explanation": "The sandbox (network namespace) is set up before any container runs. If the CNI can't hand out an IP, nothing else happens. This is a node-level networking problem, not an app problem, and it's often fixed by moving pods off a crowded node."
+        },
+        {
+          "prompt": "Trap: you `kubectl apply` a Deployment and it succeeds, but no pods show up at all. The namespace has a ResourceQuota. Where's the error?",
+          "options": [
+            "The pod's Events — quota errors show up there",
+            "The scheduler logs — quota is checked at placement",
+            "`kubectl describe rs` — the ReplicaSet's create was rejected",
+            "Nowhere — the pods are just slow to appear"
+          ],
+          "answerIndex": 2,
+          "explanation": "Quota is enforced when an object is created. With a bare pod, `apply` fails right away. With a Deployment, the Deployment object is accepted, and it's the ReplicaSet's later attempt to create pods that gets rejected. There are no pods to describe, so the error lives one level up."
+        },
+        {
+          "prompt": "Trap: the pod isn't serving traffic. Is this a Pending-pod problem?",
+          "snippet": "NAME       READY   STATUS             RESTARTS      AGE\ncheckout   0/1     CrashLoopBackOff   5 (40s ago)   4m",
+          "options": [
+            "Pending — backoff means it's waiting to be placed",
+            "Pending — CrashLoopBackOff is an image problem",
+            "Not Pending — RESTARTS > 0 means it ran; it's a crash",
+            "Pending — READY 0/1 means it never started"
+          ],
+          "answerIndex": 2,
+          "explanation": "RESTARTS is the line between the two files: zero means nothing ever ran, nonzero means it ran and died. Walking an interviewer through scheduler checks for a crashing pod is the category mistake this flowchart exists to prevent."
+        }
+      ]
+    }
+  ]
+}

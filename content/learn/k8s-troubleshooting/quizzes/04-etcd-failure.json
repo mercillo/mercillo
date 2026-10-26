@@ -1,0 +1,178 @@
+{
+  "sections": [
+    {
+      "title": "Walk the flowchart",
+      "intro": "kubectl works, but it feels sluggish. Sometimes a `kubectl apply` hangs for several seconds, and once a write failed outright. Someone says \"probably etcd.\" Don't take that on faith.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "\"Feels slow\" is your only evidence so far. What's the first move?",
+          "options": [
+            "Get a direct etcd reading and rule out your own network",
+            "Restore from the latest snapshot to be safe",
+            "Restart apiserver to reset its etcd connections",
+            "Defrag etcd — it's the most common fix"
+          ],
+          "answerIndex": 0,
+          "explanation": "\"Slow\" is a real early etcd signal, but it's vague. Your own VPN makes kubectl feel just as slow. Every fix in this file has a cost, so confirm first."
+        },
+        {
+          "prompt": "You SSH to a control-plane node and run `etcdctl endpoint health`. It fails. Before concluding etcd is down, what might be wrong with the check itself?",
+          "snippet": "{\"level\":\"warn\",\"msg\":\"retrying of unary invoker failed\",\"error\":\"context deadline exceeded\"}\nError: unhealthy cluster",
+          "options": [
+            "The location — etcdctl must run inside a pod",
+            "The API version — set `ETCDCTL_API=2`",
+            "Nothing — etcd is down",
+            "The check — on kubeadm, etcdctl needs the TLS cert flags"
+          ],
+          "answerIndex": 3,
+          "explanation": "A misconfigured health check can look exactly like an outage. Always rule out your instrument before you trust what it reports."
+        },
+        {
+          "prompt": "With certs, it responds, but slowly, with warnings. Which half of the fork are you in, and how urgent is it?",
+          "snippet": "https://10.0.1.11:2379 is healthy: successfully committed proposal: took = 1.8s",
+          "options": [
+            "Healthy — 1.8s is a normal commit time",
+            "Off-path — the slowness is apiserver's",
+            "Degraded but responding — a resource problem",
+            "Unresponsive — quorum is lost, page everyone"
+          ],
+          "answerIndex": 2,
+          "explanation": "It committed a proposal, so there's a leader and a working majority. A healthy commit takes milliseconds, and 1.8s points at a resource problem: usually disk, sometimes database size."
+        },
+        {
+          "prompt": "The etcd logs show this repeatedly. What resource is the bottleneck, and why does etcd care so much about it?",
+          "snippet": "{\"level\":\"warn\",\"msg\":\"apply request took too long\",\"took\":\"1.2s\",\"expected-duration\":\"100ms\"}\n{\"level\":\"warn\",\"msg\":\"failed to send out heartbeat on time (exceeded the 100ms timeout for 800.1ms)\"}",
+          "options": [
+            "Network bandwidth between the members",
+            "CPU — etcd's consensus is compute-heavy",
+            "Memory — the keyspace no longer fits in RAM",
+            "Disk write latency — every write is fsync'd"
+          ],
+          "answerIndex": 3,
+          "explanation": "etcd's durability guarantee is a synchronous disk write. Network-attached or shared spinning disks are the classic cause. The fix is faster dedicated storage, and you take a snapshot before migrating the data directory."
+        },
+        {
+          "prompt": "Next week, a different symptom: writes fail outright, reads still work. You check alarms. What does this mean, and is your disk full?",
+          "snippet": "$ etcdctl alarm list\nmemberID:8e9e05c52164694d alarm:NOSPACE\n\n$ df -h /var/lib/etcd\n/dev/sda1  100G  14G  86G  14% /",
+          "options": [
+            "Quorum loss — a member stopped accepting writes",
+            "Not the disk — the DB hit its storage quota",
+            "The disk is full — free space and it recovers",
+            "A false positive — disarm it and move on"
+          ],
+          "answerIndex": 1,
+          "explanation": "86G free proves this isn't the disk. NOSPACE is about `--quota-backend-bytes`. Disarming without shrinking the DB just re-trips the alarm on the next write."
+        },
+        {
+          "prompt": "apiserver already compacts etcd every 5 minutes. So why is the database still at the quota?",
+          "snippet": "$ etcdctl endpoint status --write-out=table\n| ENDPOINT            | DB SIZE | DB SIZE IN USE |\n| https://10.0.1.11   | 2.1 GB  | 310 MB         |",
+          "options": [
+            "Compaction is broken and needs restarting",
+            "The quota is miscalculated on this version",
+            "The cluster really holds 2.1 GB of live objects",
+            "Compaction frees space inside the file; only defrag shrinks it"
+          ],
+          "answerIndex": 3,
+          "explanation": "Total size vs. in-use size is the tell (if your table doesn't show the in-use column, `-w json` has `dbSizeInUse`). Defrag reclaims that space, then `etcdctl alarm disarm` re-enables writes. Raise the quota only if the in-use size genuinely needs it."
+        },
+        {
+          "prompt": "You're about to defrag. How do you run it on a 3-member cluster?",
+          "options": [
+            "Only on the leader, since it owns the data",
+            "Only on followers — never touch the leader",
+            "One member at a time, waiting for each to recover",
+            "All three at once, to finish quickly"
+          ],
+          "answerIndex": 2,
+          "explanation": "A blocked member is temporarily a failed member. With three, you can afford one at a time and no more."
+        },
+        {
+          "prompt": "Worst case, months later: two of three members are gone after a storage failure. apiserver returns `etcdserver: request timed out`, and no member reports itself as leader. What's the order of operations?",
+          "options": [
+            "Add two new empty members to regain quorum",
+            "Recover members first; restore from snapshot last",
+            "Restart apiserver until it reconnects",
+            "Restore from the latest snapshot immediately"
+          ],
+          "answerIndex": 1,
+          "explanation": "A restore always loses the writes made since the last snapshot, so it's the last resort. Adding empty members doesn't work, because joining a cluster needs an existing quorum to approve the change. This is also why how often you take snapshots is a real operational decision."
+        }
+      ]
+    },
+    {
+      "title": "Read the signal",
+      "intro": "Each one stands alone. Degraded, quorum, or not etcd at all?",
+      "questions": [
+        {
+          "prompt": "Is the cluster serving requests right now?",
+          "snippet": "$ etcdctl member list\n1, started, etcd-1, ...\n2, started, etcd-2, ...\n3, unstarted, etcd-3, ... unreachable",
+          "options": [
+            "Partly — only reads work without all members",
+            "Yes — 2 of 3 is a majority, but there's no slack left",
+            "No — any member down blocks all writes",
+            "Partly — only writes work, reads go stale"
+          ],
+          "answerIndex": 1,
+          "explanation": "Quorum is a majority, not all members. One more failure right now would mean real quorum loss, which is why this is urgent even though nothing looks broken."
+        },
+        {
+          "prompt": "Your team wants to grow from 3 etcd members to 4 \"for more resilience.\" Good idea?",
+          "options": [
+            "Yes — four members means one more spare",
+            "It makes no difference either way",
+            "Yes — even numbers elect leaders faster",
+            "No — 4 needs 3 for quorum, so it still tolerates only 1"
+          ],
+          "answerIndex": 3,
+          "explanation": "2f + 1 members tolerate f failures: 3 tolerates 1, 5 tolerates 2, and 4 is no better than 3."
+        },
+        {
+          "prompt": "Every member says it's healthy on its own, but there's no leader. The logs show this. What's broken?",
+          "snippet": "{\"level\":\"warn\",\"msg\":\"failed to dial\",\"peer-id\":\"a3f...\",\"error\":\"x509: certificate signed by unknown authority\"}",
+          "options": [
+            "Client TLS — apiserver's etcd certs are bad",
+            "The quota — writes are blocked cluster-wide",
+            "Disk latency — elections keep timing out",
+            "Peer TLS — members can't talk to each other"
+          ],
+          "answerIndex": 3,
+          "explanation": "Peer traffic (port 2380) and client traffic (2379) use separate certs and separate network paths. Checking only the client side is how this gets misdiagnosed."
+        },
+        {
+          "prompt": "kubectl doesn't respond at all: \"connection refused.\" Should you start with etcd?",
+          "options": [
+            "apiserver first — refused means it isn't running",
+            "Restore a snapshot first, then investigate",
+            "etcd first — it's the source of truth",
+            "The scheduler first — it owns placement"
+          ],
+          "answerIndex": 0,
+          "explanation": "Work from what you can observe. You can only get to etcd through apiserver's evidence, or by going straight to the node. Jumping ahead skips the cheap checks."
+        },
+        {
+          "prompt": "New pods aren't being scheduled, but kubectl is fast and writes succeed. Is this an etcd problem?",
+          "options": [
+            "Yes — it's the NOSPACE quota again",
+            "No — fast, successful writes mean etcd is fine",
+            "Yes — etcd is silently dropping new pods",
+            "Yes — a member is down and lagging"
+          ],
+          "answerIndex": 1,
+          "explanation": "Fast, successful writes are strong evidence that etcd is healthy. The symptom families are different: missing actions point to 03, slow or failing storage points to 04."
+        },
+        {
+          "prompt": "The logs show frequent `elected leader` / `lost leader` messages, but every member is up. What's the usual root cause?",
+          "options": [
+            "Too many members competing to lead",
+            "An expired CA on one of the members",
+            "The NOSPACE alarm forcing re-elections",
+            "Slow disk fsync making heartbeats miss their deadline"
+          ],
+          "answerIndex": 3,
+          "explanation": "Leader churn often looks like a membership problem but is usually a resource problem underneath. Check the disk latency warnings before touching membership."
+        }
+      ]
+    }
+  ]
+}

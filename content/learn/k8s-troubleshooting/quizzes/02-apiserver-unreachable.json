@@ -1,0 +1,179 @@
+{
+  "sections": [
+    {
+      "title": "Walk the flowchart",
+      "intro": "It's Monday morning. You open a terminal to check on the cluster and `kubectl` isn't cooperating. Work out where the failure is before you touch anything.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "Before diagnosing anything, what's the most useful thing to notice about the failure?",
+          "options": [
+            "Whether the same command worked yesterday",
+            "Which command you ran — some need more permissions",
+            "How long kubectl waited before it gave up",
+            "Whether any response came back at all, even a rejection"
+          ],
+          "answerIndex": 3,
+          "explanation": "Any HTTP response, even a 403, proves apiserver is alive, parsed your request, and made a decision. No response points at the process, the network path, or TLS. That one distinction cuts the problem in half before you read a single log. (Asking teammates is a good off-path check, but it comes later.)"
+        },
+        {
+          "prompt": "You see this. Which side of the fork are you on?",
+          "snippet": "$ kubectl get nodes\nThe connection to the server 10.0.1.10:6443 was refused - did you specify the right host or port?",
+          "options": [
+            "No response — the TCP connection itself was refused",
+            "A response — apiserver rejected the request",
+            "RBAC — you can't list nodes at cluster scope",
+            "TLS — the server's certificate was rejected"
+          ],
+          "answerIndex": 0,
+          "explanation": "\"Refused\" happens at the TCP layer, before HTTP or TLS. Nothing about your identity or permissions has been evaluated yet."
+        },
+        {
+          "prompt": "What does \"connection refused\" specifically tell you that a timeout wouldn't?",
+          "options": [
+            "The serving certificate has expired",
+            "A firewall is silently dropping your packets",
+            "The host answered, but nothing is listening on 6443",
+            "DNS resolved the server name to the wrong IP"
+          ],
+          "answerIndex": 2,
+          "explanation": "A refusal is an active answer: the kernel on that host sent back a reset. So the network path works. A timeout is silence, which points at firewalls and routing instead. Refused sends you to the process; timeout sends you to the network."
+        },
+        {
+          "prompt": "kubectl can't help you, since it talks to the thing that's down. Where do you go next?",
+          "options": [
+            "Restart every node so kubelet starts fresh",
+            "The node itself: `crictl ps -a`, `crictl logs`, the manifest",
+            "`kubectl get pods -n kube-system` with more verbosity",
+            "Regenerate your kubeconfig from scratch"
+          ],
+          "answerIndex": 1,
+          "explanation": "On kubeadm, apiserver is a static pod that kubelet runs straight from a manifest file, so you inspect it at the runtime level. A missing or broken manifest makes the process disappear. Rebuilding your kubeconfig can't fix a server that isn't running."
+        },
+        {
+          "prompt": "The apiserver container keeps exiting. Its last log lines read like this. What's actually broken?",
+          "snippet": "Error while dialing: dial tcp 127.0.0.1:2379: connect: connection refused\nF1025 ... failed to connect to etcd",
+          "options": [
+            "etcd — apiserver exits when it can't reach its storage",
+            "Your kubeconfig — it points at the wrong port",
+            "apiserver's binary — the image is corrupt",
+            "kube-proxy — it isn't routing to 2379"
+          ],
+          "answerIndex": 0,
+          "explanation": "A crashing apiserver is often a symptom, not the cause. apiserver won't start without etcd, so fixing apiserver's manifest would get you nowhere. Follow the logs to etcd (file 04)."
+        },
+        {
+          "prompt": "Different Monday. This time you see this, and the cluster is exactly one year old. What happened, and what do you NOT need to touch?",
+          "snippet": "Unable to connect to the server: x509: certificate has expired or is not yet valid",
+          "options": [
+            "The CA expired — regenerate it, then everything else",
+            "Leaf certs expired — renew them, leave the CA alone",
+            "Your laptop's clock drifted — resync it",
+            "RBAC rejected you — the binding expired"
+          ],
+          "answerIndex": 1,
+          "explanation": "The one-year anniversary is the classic giveaway. The TLS handshake fails before any HTTP happens, so this is still the no-response side of the fork. Replacing the CA would be far more disruptive than the problem calls for, because everything that trusts the CA would need to change. (A wrong clock can cause this error too, but the anniversary makes it unlikely here.)"
+        },
+        {
+          "prompt": "After renewing, `kubectl get nodes` now returns this. Is apiserver healthy?",
+          "snippet": "Error from server (Forbidden): nodes is forbidden: User \"jdoe\" cannot list resource \"nodes\" in API group \"\" at the cluster scope",
+          "options": [
+            "Unclear — etcd needs checking before you can say",
+            "Yes — it identified you and made an RBAC decision",
+            "No — the renewed certs still aren't loaded",
+            "No — Forbidden means apiserver is failing"
+          ],
+          "answerIndex": 1,
+          "explanation": "A 403 is apiserver working correctly. It knows exactly who you are. `kubectl auth can-i list nodes` confirms it, and the fix is a RoleBinding or ClusterRoleBinding for the right principal, scoped no wider than needed."
+        },
+        {
+          "prompt": "Before you declare a cluster-wide outage, which off-path check matters most?",
+          "options": [
+            "Run `kubectl get componentstatuses`",
+            "Your current context — and try from a second machine",
+            "Restart kubelet on every control-plane node",
+            "Recreate the kube-system namespace"
+          ],
+          "answerIndex": 1,
+          "explanation": "The wrong context, a stale DNS entry, or a firewall rule that only blocks your IP all look exactly like a dead cluster from where you're sitting. Two seconds of checking avoids paging the whole team over your own laptop. (`componentstatuses` also goes through apiserver, so it can't work here either.)"
+        }
+      ]
+    },
+    {
+      "title": "Read the signal",
+      "intro": "Each one stands alone. Place it on the fork, then name the likely cause.",
+      "questions": [
+        {
+          "prompt": "What's the most likely cause?",
+          "snippet": "Unable to connect to the server: dial tcp 10.0.1.10:6443: i/o timeout",
+          "options": [
+            "Your token — it expired mid-request",
+            "The certificate — the handshake stalled",
+            "The apiserver process — it crashed",
+            "The network path — firewall, security group, routing"
+          ],
+          "answerIndex": 3,
+          "explanation": "A crashed process on a reachable host usually produces a fast refusal. A timeout means your packets never got an answer, so look at the path: firewalls, security groups, routes, VPN. Test with `nc -vz 10.0.1.10 6443`."
+        },
+        {
+          "prompt": "Which layer rejected you?",
+          "snippet": "error: You must be logged in to the server (Unauthorized)",
+          "options": [
+            "Network — the connection dropped midway",
+            "TLS — the handshake failed before HTTP",
+            "Authentication — apiserver can't tell who you are",
+            "Authorization — RBAC denied the action"
+          ],
+          "answerIndex": 2,
+          "explanation": "401 means \"I don't know who you are.\" 403 means \"I know who you are, and no.\" A 401 is fixed in your kubeconfig credentials, not in RBAC. `kubectl auth whoami` helps when you aren't sure which identity is being sent."
+        },
+        {
+          "prompt": "A response came back. Is this a \"you\" problem like 401/403?",
+          "snippet": "Error from server: etcdserver: request timed out",
+          "options": [
+            "Yes — RBAC evaluation is too slow",
+            "No — apiserver is fine; its backend (etcd) is failing",
+            "No — the network to apiserver is flaky",
+            "Yes — your credentials timed out"
+          ],
+          "answerIndex": 1,
+          "explanation": "This is the branch the original flowchart skipped: a response that isn't a rejection of you. Network, TLS, and auth all worked. The failure is behind apiserver. Go to etcd."
+        },
+        {
+          "prompt": "What's different about this error compared to \"certificate has expired\"?",
+          "snippet": "Unable to connect to the server: x509: certificate signed by unknown authority",
+          "options": [
+            "Trust — your kubeconfig expects a different CA",
+            "Clock — the server's time is wrong",
+            "RBAC — the CA isn't bound to your user",
+            "Time — the cert expired, so renew it"
+          ],
+          "answerIndex": 0,
+          "explanation": "Expired is a time problem. Unknown authority is a trust problem. Renewing certs won't fix a kubeconfig that points at the wrong CA, so check `certificate-authority-data` and which cluster you're actually aimed at."
+        },
+        {
+          "prompt": "In an HA cluster with three apiservers behind a load balancer, every kubectl call times out, but SSHing into each control-plane node shows apiserver running and healthy. Where's the problem?",
+          "options": [
+            "All three apiservers — they're secretly broken",
+            "RBAC — the LB's identity was revoked",
+            "etcd — it's refusing the apiservers",
+            "The load balancer / VIP in front of them"
+          ],
+          "answerIndex": 3,
+          "explanation": "From the client, a dead LB and three dead apiservers look identical. Checking the backends directly is what separates them. Healthy backends behind a silent endpoint means the LB."
+        },
+        {
+          "prompt": "Someone was editing `/etc/kubernetes/manifests/kube-apiserver.yaml` in place and kubectl started refusing connections. Why is in-place editing risky here?",
+          "options": [
+            "Every edit also forces an etcd restart",
+            "kubelet acts on every save — a bad file kills the pod",
+            "The scheduler caches the old manifest",
+            "The file is read-only, so edits silently fail"
+          ],
+          "answerIndex": 1,
+          "explanation": "Static pods are driven entirely by files on disk. Prepare the new manifest elsewhere and move it in with one atomic step. And never leave backup copies in that directory, because kubelet will try to run those too."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "sections": [
+    {
+      "title": "Walk the flowchart",
+      "intro": "kubectl answers instantly and everything already running is fine. But two different teammates report that \"nothing new is happening.\" Figure out which component stopped.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "Existing pods are all Running and serving traffic, untouched. What does that already rule out?",
+          "options": [
+            "kubelet and the node — they keep running pods alive",
+            "The scheduler — it would evict running pods",
+            "Nothing yet — every component is still a suspect",
+            "The controller-manager — it restarts running pods"
+          ],
+          "answerIndex": 0,
+          "explanation": "Neither the scheduler nor the controller-manager is needed to keep a running pod alive, so a healthy steady state is exactly what you'd expect if one of them died. The fact that only new things are broken is the clue."
+        },
+        {
+          "prompt": "Both components fit \"nothing automatic is happening.\" What's the question that actually tells them apart?",
+          "options": [
+            "Which kube-system pod has the most restarts?",
+            "Is it one namespace, or every namespace?",
+            "Is etcd slow to persist new objects?",
+            "New pods not *placed*, or missing pods not *replaced*?"
+          ],
+          "answerIndex": 3,
+          "explanation": "The scheduler owns placement: binding a pod to a node. The controller-manager owns reconciliation: noticing that desired state ≠ actual state and creating objects to close the gap. Which side of the lifecycle is stuck tells you which one is down."
+        },
+        {
+          "prompt": "You want a test you can run without harming anything real. Which is best?",
+          "options": [
+            "Cordon a node and see whether pods move",
+            "Delete a production pod and watch for a replacement",
+            "Restart both components and see which fixes it",
+            "Create a throwaway Deployment and see how far it gets"
+          ],
+          "answerIndex": 3,
+          "explanation": "A throwaway Deployment goes through both components in order. The Deployment controller has to create a ReplicaSet and a pod (controller-manager), then the scheduler has to bind that pod. Where it stops tells you which one is broken. Restarting both might fix it, but you'd learn nothing."
+        },
+        {
+          "prompt": "Result of the test. Which component is down?",
+          "snippet": "$ kubectl get rs,pods -l app=probe\nNo resources found in default namespace.\n\n$ kubectl get deployment probe\nNAME    READY   UP-TO-DATE   AVAILABLE   AGE\nprobe   0/1     0            0           2m",
+          "options": [
+            "The scheduler — the pod can't be placed",
+            "etcd — the objects weren't saved",
+            "kubelet — the node never started the pod",
+            "The controller-manager — no ReplicaSet was ever created"
+          ],
+          "answerIndex": 3,
+          "explanation": "The scheduler can only place a pod that exists. Here no pod object exists at all, because the reconcile loop never turned the Deployment into a ReplicaSet. etcd is fine: the Deployment itself was saved and read back."
+        },
+        {
+          "prompt": "You confirm it. What's the real cost of this outage, beyond the fix itself?",
+          "snippet": "$ kubectl get pods -n kube-system | grep controller-manager\nkube-controller-manager-cp-1   0/1   CrashLoopBackOff   7   12m",
+          "options": [
+            "Every reconcile loop is paused — drift piles up",
+            "etcd will lose data written meanwhile",
+            "Running pods will start crashing soon",
+            "None — running pods are completely unaffected"
+          ],
+          "answerIndex": 0,
+          "explanation": "The fix is just restarting the static pod and reading its logs for why it crashed. What matters is the window: nothing self-heals while it's down, so duration matters more than the fix."
+        },
+        {
+          "prompt": "Rerun the same test on a different cluster. Now which is it?",
+          "snippet": "$ kubectl get rs,pods -l app=probe\nNAME                       DESIRED   CURRENT   READY\nreplicaset.apps/probe-7c   1         1         0\n\nNAME           READY   STATUS    RESTARTS   AGE\npod/probe-7c-x   0/1     Pending   0          3m\n\n$ kubectl describe pod probe-7c-x | tail -1\nEvents:  <none>",
+          "options": [
+            "The controller-manager — the pod isn't running",
+            "The scheduler — the pod exists but nothing placed it",
+            "The image — it can't be pulled",
+            "Capacity — the cluster is full"
+          ],
+          "answerIndex": 1,
+          "explanation": "A resource shortage would leave a FailedScheduling event explaining why. Zero events means the scheduler never attempted it. If every new pod looks like this, check `kube-scheduler` in `kube-system`."
+        },
+        {
+          "prompt": "This is an HA control plane: three nodes, and all three `kube-scheduler` pods show Running. But pods still aren't being placed. What do you check?",
+          "options": [
+            "kube-proxy logs on each control-plane node",
+            "The leader-election lease and its `renewTime`",
+            "`etcdctl member list` on each node",
+            "Nothing — Running means the scheduler is fine"
+          ],
+          "answerIndex": 1,
+          "explanation": "Only one replica does the work. A pod showing Running proves the process exists, not that it's doing anything useful. The lease shows who's supposed to be working and when it last checked in."
+        },
+        {
+          "prompt": "Final sanity check: someone reports \"I deleted a pod from the `reports` Deployment and nothing replaced it.\" Before blaming the controller-manager, what do you look at?",
+          "options": [
+            "etcd health on the control plane",
+            "kubelet logs on the pod's old node",
+            "The Deployment's desired replica count",
+            "The scheduler logs in kube-system"
+          ],
+          "answerIndex": 2,
+          "explanation": "No replacement is only a failure if something wanted one. Confirm the desired state before calling it broken."
+        }
+      ]
+    },
+    {
+      "title": "Read the signal",
+      "intro": "Scheduler, controller-manager, or neither?",
+      "questions": [
+        {
+          "prompt": "A pod sits Pending with this event. Is the scheduler broken?",
+          "snippet": "Warning  FailedScheduling  default-scheduler  0/4 nodes are available: 4 Insufficient cpu.",
+          "options": [
+            "Yes — a failed schedule means it's broken",
+            "Yes — restart it to clear the queue",
+            "No — it's working; it's telling you the constraint",
+            "No — it's the controller-manager's fault"
+          ],
+          "answerIndex": 2,
+          "explanation": "Getting a FailedScheduling event at all proves the scheduler is alive and doing its job. \"Scheduler down\" looks like silence, not a complaint."
+        },
+        {
+          "prompt": "Namespaces stay stuck in `Terminating` forever, and Service Endpoints don't update when pods come and go. One component explains both. Which?",
+          "options": [
+            "The controller-manager — both loops live inside it",
+            "CoreDNS — it tracks namespace state",
+            "The scheduler — it places Endpoints too",
+            "kube-proxy — it owns Endpoints and namespaces"
+          ],
+          "answerIndex": 0,
+          "explanation": "The controller-manager is many reconcile loops bundled into one process. When it dies, every loop stops at once, so symptoms that look unrelated across the cluster are a strong hint."
+        },
+        {
+          "prompt": "Under heavy load, an HPA never adds replicas. Is this the controller-manager core loop failing?",
+          "options": [
+            "Yes — the ReplicaSet controller is down",
+            "Probably not — check the HPA's metrics source first",
+            "No — it's the scheduler not placing pods",
+            "Yes — etcd isn't storing the new count"
+          ],
+          "answerIndex": 1,
+          "explanation": "The HPA controller runs in the controller-manager, but its usual failure is missing input, not a dead loop. If deleted pods still get replaced, the core reconciliation is fine and only the metrics pipeline is broken."
+        },
+        {
+          "prompt": "On a managed cluster (EKS/GKE), `kubectl get pods -n kube-system` shows no scheduler or controller-manager pods at all. Are they down?",
+          "options": [
+            "Yes — they were deleted and need reinstalling",
+            "Yes — managed clusters still show them",
+            "No — managed clusters don't have a scheduler",
+            "Not necessarily — the provider hides the control plane"
+          ],
+          "answerIndex": 3,
+          "explanation": "Not seeing them is normal on managed Kubernetes. The placement-vs-replacement test still works because it only uses the API."
+        },
+        {
+          "prompt": "You see this. What does it say about cluster behavior right now?",
+          "snippet": "$ kubectl get pods -n kube-system | grep scheduler\nkube-scheduler-cp-1   0/1   CrashLoopBackOff   6   10m",
+          "options": [
+            "Running pods are being evicted from nodes",
+            "New pods won't be placed; running pods are fine",
+            "kubectl will stop responding shortly",
+            "Deleted pods won't get replacement objects"
+          ],
+          "answerIndex": 1,
+          "explanation": "Replacement pod *objects* will still be created, because the controller-manager is fine. They'll just pile up in Pending with no events until the scheduler is back."
+        }
+      ]
+    }
+  ]
+}

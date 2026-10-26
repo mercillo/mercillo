@@ -1,0 +1,199 @@
+{
+  "sections": [
+    {
+      "title": "Climb the ladder",
+      "intro": "The `web` pods can't reach the `cart` Service. Everyone has a theory. Test one layer at a time, from the bottom up — the first rung that fails is your answer.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "Before testing any networking, what do you confirm, and why?",
+          "options": [
+            "That the pods are Running *and* Ready",
+            "That no NetworkPolicy exists in the namespace",
+            "That CoreDNS is running in kube-system",
+            "That kube-proxy is running on every node"
+          ],
+          "answerIndex": 0,
+          "explanation": "If the pods aren't Ready, every rung above them fails for a reason that has nothing to do with the network. Checking first keeps you from debugging the wrong layer."
+        },
+        {
+          "prompt": "The pods are Ready. Why test in the order Pod IP → ClusterIP → DNS name, rather than just curling the Service name?",
+          "options": [
+            "It matches the order in the Service spec",
+            "Each layer sits on the one below it",
+            "The Service-name test is unreliable",
+            "DNS is the slowest test, so it goes last"
+          ],
+          "answerIndex": 1,
+          "explanation": "Curling the name alone tells you *something* is broken somewhere in three layers. The ladder tells you which one."
+        },
+        {
+          "prompt": "Rung 1: from a `web` pod, you curl a `cart` pod's IP directly. What do you conclude?",
+          "snippet": "$ kubectl exec web-1 -- curl -m 3 10.244.2.17:8080\ncurl: (7) Failed to connect to 10.244.2.17 port 8080: Connection refused",
+          "options": [
+            "kube-proxy is down on that node",
+            "The packet arrived — nothing listens on that port",
+            "A NetworkPolicy is rejecting the traffic",
+            "The CNI is broken between these pods"
+          ],
+          "answerIndex": 1,
+          "explanation": "Refused vs. timed out is the most valuable split on this rung. A timeout means packets aren't arriving (CNI or policy). A refusal means they arrived and nothing was listening there. You can check what the app listens on with `ss -ltn` inside the pod, if the image has it."
+        },
+        {
+          "prompt": "The app was actually listening on 3000. You retry on the right port and rung 1 passes. Now rung 2: curl the Service's ClusterIP. A teammate says \"just ping the ClusterIP first, it's quicker.\" Why not?",
+          "options": [
+            "ClusterIPs block ICMP as a security default",
+            "Ping is too slow to be a useful signal",
+            "Ping needs root inside the container",
+            "ClusterIPs only answer on Service ports, not ICMP"
+          ],
+          "answerIndex": 3,
+          "explanation": "A failed ping to a ClusterIP is meaningless, and it's a classic way to send everyone down the wrong path. Test with `curl` or `nc` on the Service port."
+        },
+        {
+          "prompt": "Curl to the ClusterIP times out. Before you suspect kube-proxy itself, what's the cheapest, most likely check?",
+          "options": [
+            "Check CoreDNS logs",
+            "Dump iptables on the node",
+            "`kubectl get endpoints cart`",
+            "Restart kube-proxy on every node"
+          ],
+          "answerIndex": 2,
+          "explanation": "A wrong selector is far more common than a broken kube-proxy, and checking it is one read-only command. Rule out configuration before you rule out a component."
+        },
+        {
+          "prompt": "Endpoints come back empty. Compare these. What's wrong?",
+          "snippet": "$ kubectl get svc cart -o jsonpath='{.spec.selector}'\n{\"app\":\"cart-svc\"}\n\n$ kubectl get pods -l app=cart --show-labels\ncart-5d-abc   1/1   Running   app=cart,pod-template-hash=5d",
+          "options": [
+            "The pods aren't Ready, so they're excluded",
+            "The CNI never assigned the pods IPs",
+            "kube-proxy is down on the pods' node",
+            "The selector says `cart-svc`; the pods say `cart`"
+          ],
+          "answerIndex": 3,
+          "explanation": "That's a config issue that looks exactly like a component failure. Fix the selector, and endpoints show up within seconds. Note also that Endpoints only list *Ready* pods, so not-Ready pods produce the same `<none>`."
+        },
+        {
+          "prompt": "Selector fixed, endpoints populated, but the ClusterIP curl now returns \"connection refused.\" What's left at this rung?",
+          "options": [
+            "kube-proxy's rules are stale",
+            "DNS is resolving to an old ClusterIP",
+            "`targetPort` doesn't match the container's port",
+            "The CNI overlay is dropping return traffic"
+          ],
+          "answerIndex": 2,
+          "explanation": "Traffic is reaching the pod, but on a port nobody listens to. That's the same refused-vs-timeout reasoning as rung 1, one layer up."
+        },
+        {
+          "prompt": "Rung 2 passes after fixing `targetPort`. Rung 3: the name fails. What does that isolate it to, and what's a good control test?",
+          "snippet": "$ kubectl exec web-1 -- nslookup cart.shop.svc.cluster.local\n;; connection timed out; no servers could be reached",
+          "options": [
+            "The CNI — DNS packets are being dropped",
+            "DNS only — test `nslookup kubernetes.default`",
+            "kube-proxy — the name maps to a ClusterIP",
+            "The app — it isn't registered with DNS"
+          ],
+          "answerIndex": 1,
+          "explanation": "Every layer below DNS is proven to work, so this is entirely name resolution. `kubernetes.default` always exists, which makes it a clean control."
+        },
+        {
+          "prompt": "Final sanity check: `web` is in namespace `storefront`, `cart` is in `shop`, and the app code calls `http://cart:3000`. Is DNS broken?",
+          "options": [
+            "No — short names only resolve in the same namespace",
+            "Yes — CoreDNS should find it anywhere",
+            "No — a NetworkPolicy is blocking it",
+            "Yes — restart CoreDNS to refresh records"
+          ],
+          "answerIndex": 0,
+          "explanation": "This is one of the most common reasons DNS looks broken when it isn't. The resolver tries `cart.storefront.svc.cluster.local`, which doesn't exist."
+        }
+      ]
+    },
+    {
+      "title": "Read the signal",
+      "intro": "Each one stands alone. Which rung, which component, and why?",
+      "questions": [
+        {
+          "prompt": "Which component is most likely broken?",
+          "snippet": "$ kubectl exec pod-a -- curl -m 3 10.244.1.9:8080   # same node\nHTTP/1.1 200 OK\n$ kubectl exec pod-a -- curl -m 3 10.244.3.4:8080   # different node\ncurl: (28) Connection timed out",
+          "options": [
+            "The app running on 10.244.3.4",
+            "CoreDNS on the second node",
+            "The CNI's cross-node overlay or routing",
+            "kube-proxy on the second node"
+          ],
+          "answerIndex": 2,
+          "explanation": "Comparing same-node and cross-node results is what separates \"CNI is down\" from \"the overlay between nodes is broken.\" Often this ends up with the infra team."
+        },
+        {
+          "prompt": "Only `web` → `payments` traffic times out. Every other pod pair works. What's the first suspect?",
+          "options": [
+            "The payments image listening on the wrong port",
+            "A crashed CNI plugin on payments' node",
+            "A NetworkPolicy — selective blocking is by design",
+            "kube-proxy failing for that one Service"
+          ],
+          "answerIndex": 2,
+          "explanation": "A broken network fails indiscriminately, while a policy fails selectively. Fix the policy's *intent* instead of deleting it. And note that policies only take effect if your CNI enforces them (Flannel alone doesn't)."
+        },
+        {
+          "prompt": "Pod-to-pod works and Endpoints are populated, but ClusterIP traffic times out from pods on one node only. What do you check on that node?",
+          "options": [
+            "kube-proxy on that node — its pod and its rules",
+            "CoreDNS — that node can't resolve the name",
+            "The Service selector — it skips that node",
+            "The app's port — it differs on that node"
+          ],
+          "answerIndex": 0,
+          "explanation": "Failing on one node only means something local to that node. kube-proxy runs per node, so a crashed or stale instance breaks only the Services on that node."
+        },
+        {
+          "prompt": "Your cluster runs Cilium with kube-proxy replacement. A teammate can't find any kube-proxy pods or iptables rules for Services. Is that the bug?",
+          "options": [
+            "Yes — Services always need iptables rules",
+            "No — it's a DNS problem instead",
+            "No — Cilium handles Services in eBPF there",
+            "Yes — reinstall kube-proxy on every node"
+          ],
+          "answerIndex": 2,
+          "explanation": "Know which data plane you're actually running. Looking for kube-proxy in a kube-proxy-free cluster is debugging something that isn't there."
+        },
+        {
+          "prompt": "One pod can't resolve any cluster names. Every other pod can. Its resolv.conf looks like this. What's wrong?",
+          "snippet": "$ kubectl exec metrics-agent -- cat /etc/resolv.conf\nnameserver 10.0.0.2\nsearch ec2.internal",
+          "options": [
+            "It's using the node's resolver, not cluster DNS",
+            "The kube-dns Service has no endpoints",
+            "The CNI didn't give it a DNS address",
+            "CoreDNS is down for this one pod"
+          ],
+          "answerIndex": 0,
+          "explanation": "A single pod failing points at its own config, not the cluster's DNS. A healthy cluster pod has the kube-dns ClusterIP as its nameserver and `svc.cluster.local` search domains."
+        },
+        {
+          "prompt": "CoreDNS pods are all Running and Ready, but no pod can resolve anything, and this started right after an upgrade. What do you check?",
+          "snippet": "$ kubectl get endpoints -n kube-system kube-dns\nNAME       ENDPOINTS\nkube-dns   <none>",
+          "options": [
+            "The CNI on the CoreDNS pods' nodes",
+            "The kube-dns selector vs. the CoreDNS pod labels",
+            "Restart CoreDNS so it re-registers",
+            "Every pod's resolv.conf, one by one"
+          ],
+          "answerIndex": 1,
+          "explanation": "This is the same failure as a mismatched app selector, just one layer up. Healthy pods behind a Service that selects nothing look exactly like dead pods."
+        },
+        {
+          "prompt": "Every in-cluster test passes: pod IP, ClusterIP, DNS name. External users still can't reach the site. Where now?",
+          "options": [
+            "Back down to the CNI — retest pod IPs",
+            "CoreDNS — external names resolve there",
+            "kube-proxy — external traffic uses it first",
+            "The edge — the Ingress controller or cloud LB"
+          ],
+          "answerIndex": 3,
+          "explanation": "The ladder passing is a result too: it proves the cluster's internal networking works. Don't go back down a ladder you just climbed."
+        }
+      ]
+    }
+  ]
+}
