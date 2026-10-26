@@ -1,0 +1,160 @@
+{
+  "sections": [
+    {
+      "title": "Answer the AI question",
+      "intro": "\"How do you use AI in your day-to-day work?\" The usual mistake here is answering too analytically, with a tour of tools and features, when the interviewer is listening for judgment. Build a better answer one step at a time.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "What is this question really evaluating?",
+          "options": [
+            "Your judgment — what you delegate, why, how you check it",
+            "Your speed — how much faster AI makes you",
+            "Your tool knowledge — which models and IDEs you use",
+            "Your enthusiasm — how much you use AI overall"
+          ],
+          "answerIndex": 0,
+          "explanation": "A tour of tools and features answers a question nobody asked. The five areas (Work, Trust, Iteration, Growth, Scaling) are all about how you think and what you own."
+        },
+        {
+          "prompt": "Which Work example is strongest?",
+          "options": [
+            "\"I've tried most of the major models.\"",
+            "A one-day prototype that unlocked a go/no-go decision",
+            "\"I use AI for basically everything now.\"",
+            "\"I use Copilot for autocomplete all the time.\""
+          ],
+          "answerIndex": 1,
+          "explanation": "The best Work answers show AI changing what was *possible*, not just shaving time off a task you already knew how to do. \"Everything\" reads as naive."
+        },
+        {
+          "prompt": "To show judgment, what else belongs in the answer?",
+          "options": [
+            "A claim that AI never makes mistakes for you",
+            "Your opinion of which vendor is best",
+            "A list of the AI tools you've rejected",
+            "A specific moment you turned AI off, and why"
+          ],
+          "answerIndex": 3,
+          "explanation": "For example: \"It was producing plausible guesses without real context on our cluster, so I finished it by hand.\" Knowing where AI doesn't fit is as strong a signal as knowing where it does."
+        },
+        {
+          "prompt": "Trust is the one area that doesn't carry over from general experience. Why?",
+          "options": [
+            "Interviewers rarely ask about it",
+            "It's a new name for code review, nothing more",
+            "You only learn it by catching real AI mistakes yourself",
+            "It only applies to security teams"
+          ],
+          "answerIndex": 2,
+          "explanation": "General debugging skill carries over to an unfamiliar debugger. AI-specific verification habits don't come from anywhere else; you have to have built them in practice."
+        },
+        {
+          "prompt": "Which Trust detail is most convincing?",
+          "options": [
+            "\"I only use the most accurate models.\"",
+            "\"I trust it for most things at this point.\"",
+            "\"It reused a deprecated internal API; tests caught it.\"",
+            "\"I always double-check the output.\""
+          ],
+          "answerIndex": 2,
+          "explanation": "It names a real, codebase-specific mistake and the check that caught it. \"I double-check\" is something everyone says, and nobody can tell whether it's true."
+        },
+        {
+          "prompt": "They follow up: \"What won't you paste into an AI tool?\" Best answer?",
+          "options": [
+            "\"I don't really think about it much.\"",
+            "\"Everything is fine if it's internal.\"",
+            "A line you've actually drawn: secrets, customer data, keys",
+            "\"Nothing — the vendors handle security.\""
+          ],
+          "answerIndex": 2,
+          "explanation": "Managing what you share is part of Trust. A clear, explicit line, ideally with how you enforce it, shows real judgment. Making it up case by case doesn't."
+        },
+        {
+          "prompt": "Then a values question: \"How do you think about AI adoption on a team?\" What shape should the answer take?",
+          "options": [
+            "A clear principle, then a concrete example",
+            "A story only, with no stated principle",
+            "A long list of pros and cons",
+            "A prediction about where AI is headed"
+          ],
+          "answerIndex": 0,
+          "explanation": "Values questions need a point of view, grounded in something real. For example: delegate what's quick to verify, stay hands-on where mistakes are costly, and look at whole workflows rather than single tasks."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Which AI area does it show, or what's wrong with it?",
+      "questions": [
+        {
+          "prompt": "\"I keep a project instruction file that's grown over months — each repeat mistake becomes a rule.\" Which area?",
+          "options": [
+            "Work — shipping a concrete outcome",
+            "Scaling — spreading practice across the org",
+            "Iteration — treating AI tooling as maintained infrastructure",
+            "Trust — verifying output correctness"
+          ],
+          "answerIndex": 2,
+          "explanation": "Iteration asks whether your approach has meaningfully changed recently based on what you've seen work or fail. A file that keeps growing is direct evidence."
+        },
+        {
+          "prompt": "\"I ran pairing sessions for skeptical teammates and we wrote team conventions for what goes to AI.\" Which area?",
+          "options": [
+            "Scaling — moving good practice beyond yourself",
+            "Work — what you personally shipped",
+            "Iteration — refining your own prompts",
+            "Growth — how you personally stay current"
+          ],
+          "answerIndex": 0,
+          "explanation": "Scaling maps to Leadership. It's the area that matters most for senior roles, especially when it changes how a team works, not just how fast one person works."
+        },
+        {
+          "prompt": "\"I follow a lot of AI newsletters.\" What's missing for a strong Growth answer?",
+          "options": [
+            "Nothing — reading is enough",
+            "Evidence of acting on it — what you tried after",
+            "A certification in prompt engineering",
+            "More newsletters — breadth shows commitment"
+          ],
+          "answerIndex": 1,
+          "explanation": "What makes a Growth answer strong is specifics: a named source, plus something you actually tried because of it. Just consuming content isn't the signal."
+        },
+        {
+          "prompt": "Why is AI output easier to trust for code than for prose?",
+          "options": [
+            "Code can be checked independently, by tests and CI",
+            "Code from AI never has bugs",
+            "Models are trained mostly on code",
+            "Prose is always lower stakes"
+          ],
+          "answerIndex": 0,
+          "explanation": "Correctness for prose is fuzzy, while code can be tested. That's why strong answers lean on testing discipline as the way to check AI-generated code."
+        },
+        {
+          "prompt": "A candidate answers only with \"I ship 3x faster with AI.\" How does that read?",
+          "options": [
+            "Strong — velocity is what companies want",
+            "Fine, if they give the exact multiplier",
+            "Too modest — they should claim more",
+            "Naive — speed with no verification story"
+          ],
+          "answerIndex": 3,
+          "explanation": "On any non-trivial codebase, output is rarely right the first time. Speed with no mention of how you check the results is a Trust red flag."
+        },
+        {
+          "prompt": "Why revisit your prepared AI answers regularly?",
+          "options": [
+            "Interviewers memorize common answers",
+            "Companies change their AI policies yearly",
+            "The space moves fast — last quarter's answer goes stale",
+            "You shouldn't — consistency matters more"
+          ],
+          "answerIndex": 2,
+          "explanation": "A story about a workflow you've since outgrown undercuts the Iteration signal. Keep your examples recent."
+        }
+      ]
+    }
+  ]
+}

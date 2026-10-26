@@ -1,0 +1,149 @@
+{
+  "sections": [
+    {
+      "title": "Run the rehearsal",
+      "intro": "A few days out. Your stories are written. Now turn them into something you can say out loud under pressure.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "What should you rehearse — the exact words, or something else?",
+          "options": [
+            "Only the opening line of each story",
+            "The exact script, word for word",
+            "Nothing — rehearsing makes you sound robotic",
+            "The key points of each beat, not exact wording"
+          ],
+          "answerIndex": 3,
+          "explanation": "Sounding robotic comes from memorizing wording. Practicing the points you want to hit builds fluency without the stiffness."
+        },
+        {
+          "prompt": "First take: you record yourself telling your leadership story. Reviewing it, what do you check?",
+          "options": [
+            "Only how long the whole thing ran",
+            "Only whether the facts are accurate",
+            "Pacing, I vs. we, fillers, energy, organization",
+            "Lighting, camera angle, and background"
+          ],
+          "answerIndex": 2,
+          "explanation": "That's the solo review checklist. For example: three minutes in with no actions yet is a pacing failure, and actually counting \"we\" usually surprises people."
+        },
+        {
+          "prompt": "Playback shows 90 seconds of setup before your first action. What do you fix on take two?",
+          "options": [
+            "Add more Context so it's clearer",
+            "Move the setup to after the Results",
+            "Cut Context to the stakes — get to an action by ~20s",
+            "Speak faster through the same setup"
+          ],
+          "answerIndex": 2,
+          "explanation": "Aim for about 10% / 60% / 30%. Two or three takes, each fixing what the last one showed, usually gets real improvement. Watching at 1.5x still catches pacing problems and saves time."
+        },
+        {
+          "prompt": "Your stories feel solid. What's the next drill?",
+          "options": [
+            "Write a brand-new story for every question",
+            "Re-record the same stories ten more times",
+            "Stop — the stories are ready",
+            "Random questions: decode, pick a story, deliver aloud"
+          ],
+          "answerIndex": 3,
+          "explanation": "The real interview tests the reflex: question → signal → story → CARL. When a type of question keeps landing on a weak story, that's a gap to fill before the real thing."
+        },
+        {
+          "prompt": "You use an AI to mock-interview you. What is it genuinely good for?",
+          "options": [
+            "Surfacing unexpected follow-ups on your stories",
+            "Replacing human mocks entirely",
+            "Simulating real pressure and nonverbal cues",
+            "Telling you if you'll get the offer"
+          ],
+          "answerIndex": 0,
+          "explanation": "Most candidates rehearse the opening and get caught by the follow-ups. AI can't give you live pressure, real interruptions, or a read of the room, which is why human mocks still matter."
+        },
+        {
+          "prompt": "A friend agrees to mock-interview you. How do you set them up to actually help?",
+          "options": [
+            "Ask them to be encouraging so you feel confident",
+            "Varied questions, a simple rubric, permission to be blunt",
+            "Give them only your strongest question type",
+            "Let them wing it with no guidance"
+          ],
+          "answerIndex": 1,
+          "explanation": "Spread the questions across signal areas, give them a 1-5 rubric (structure, story choice, depth, delivery), ask for real follow-ups, and ask for honest critique, not reassurance."
+        },
+        {
+          "prompt": "It's interview morning. How do you spend the time?",
+          "options": [
+            "Run three full mock interviews",
+            "Write a brand-new backup story",
+            "One quiet read-through of your stories and notes",
+            "Learn one more framework to be safe"
+          ],
+          "answerIndex": 2,
+          "explanation": "No new material. Confidence comes from repetition you've already done, and cramming just adds stress on top of it."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Each one stands alone.",
+      "questions": [
+        {
+          "prompt": "You have only one evening before the interview. What does the course recommend?",
+          "options": [
+            "Rewrite every story from scratch",
+            "Compress the ladder, don't skip practice entirely",
+            "Book a professional mock and nothing else",
+            "Skip practice — there isn't enough time"
+          ],
+          "answerIndex": 1,
+          "explanation": "One day of solo practice beats walking into a mock cold, and a 30-minute peer mock beats none at all."
+        },
+        {
+          "prompt": "Which story deserves the most extra practice?",
+          "options": [
+            "The Big Three — TMAY, flagship project, conflict",
+            "Your oldest story, since you remember it least",
+            "Your rarest, most unusual story",
+            "Whichever one is shortest"
+          ],
+          "answerIndex": 0,
+          "explanation": "They come up almost every time. Practice them until you can tell them conversationally without notes. TMAY's first 20 seconds set the tone for the whole interview."
+        },
+        {
+          "prompt": "What does a professional mock give you that a peer can't?",
+          "options": [
+            "Calibration against real hire/no-hire bars",
+            "Encouragement during a stressful process",
+            "Someone to ask you follow-up questions",
+            "Live pressure from a human listener"
+          ],
+          "answerIndex": 0,
+          "explanation": "A peer gives you pressure, follow-ups, and encouragement too. The professional's extra value is pattern-matching you against many real candidates at your target level."
+        },
+        {
+          "prompt": "During a peer mock, you notice you say \"basically\" constantly. When did you probably first notice?",
+          "options": [
+            "Reading the course notes",
+            "Thinking through the story silently",
+            "Watching a recording — most people never hear it live",
+            "Writing the story down on paper"
+          ],
+          "answerIndex": 2,
+          "explanation": "Filler words are invisible from the inside. That's why recording yourself, and recording mocks with permission, matters so much."
+        },
+        {
+          "prompt": "Your conflict story, rehearsed, comes out sounding flat and bland. What's the fix?",
+          "options": [
+            "Switch to a lower-stakes conflict",
+            "Speed up so it ends sooner",
+            "Remove even more of the emotional detail",
+            "Keep it professional, but leave the real emotion in"
+          ],
+          "answerIndex": 3,
+          "explanation": "A conflict story needs believable emotion, delivered in an even tone. Sanding it down for safety takes out the evidence that you can handle hard moments."
+        }
+      ]
+    }
+  ]
+}

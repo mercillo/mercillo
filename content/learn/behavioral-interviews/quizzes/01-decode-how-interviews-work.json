@@ -1,0 +1,153 @@
+{
+  "sections": [
+    {
+      "title": "Decode it live",
+      "intro": "The interviewer leans in: \"Tell me about a time you had to make a call without all the information you wanted.\" Before you say a word, decode it.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "What shape of question is this?",
+          "options": [
+            "A values question — they want your philosophy",
+            "A past-behavior question — they want one real story",
+            "A hypothetical — they want your general approach",
+            "A technical question — they want the decision itself"
+          ],
+          "answerIndex": 1,
+          "explanation": "\"Tell me about a time…\" asks for a specific past event, because past behavior is the best predictor they have. Answering with \"generally, I'd…\" dodges what they asked for."
+        },
+        {
+          "prompt": "Which signal area is this primarily testing?",
+          "options": [
+            "Ambiguity — moving forward with incomplete information",
+            "Ownership — driving the problem end-to-end",
+            "Perseverance — pushing through a hard obstacle",
+            "Scope — the size of the problem you handled"
+          ],
+          "answerIndex": 0,
+          "explanation": "\"Without all the information\" is the tell. A good story will touch others too, but if the ambiguity isn't center stage, you've answered a different question."
+        },
+        {
+          "prompt": "What do candidates most often *under-tell* in an Ambiguity story?",
+          "options": [
+            "How they created clarity, and how they checked it after",
+            "How quickly they made the final decision",
+            "How uncertain and stressful the situation felt",
+            "Who on the team was responsible for the gap"
+          ],
+          "answerIndex": 0,
+          "explanation": "Saying \"it was ambiguous\" isn't the signal. Showing *how* you reduced the uncertainty (data, conversations, a quick prototype) and then validated your assumptions is."
+        },
+        {
+          "prompt": "The company publishes values like \"Bias for Action.\" How should that change your answer?",
+          "options": [
+            "Ignore it — values never affect the scoring",
+            "Mention as many of their values as you can",
+            "Let it shape word choice where it fits naturally",
+            "Name the value explicitly in your opening line"
+          ],
+          "answerIndex": 2,
+          "explanation": "Values are mostly the same signal areas in company vocabulary. Forcing them in (\"value-dropping\") is obvious to trained interviewers. At a company that genuinely runs on its values, like Amazon, the exact language matters more."
+        },
+        {
+          "prompt": "You're interviewing for a senior role. Your best ambiguity story is from your first year, a small ticket. What's the risk?",
+          "options": [
+            "None — any honest example scores the same",
+            "Scope — a junior-sized story can get you downleveled",
+            "Recency — interviewers dislike older stories",
+            "Relevance — the story isn't really about ambiguity"
+          ],
+          "answerIndex": 1,
+          "explanation": "Story choice is itself a Scope signal. A small-box story tells them you operate in a small box, even if you tell it perfectly."
+        },
+        {
+          "prompt": "Mid-story, you realize it also shows you persuading a skeptical manager. What do you do with that?",
+          "options": [
+            "Make it the main thread of the story instead",
+            "Cut it — stick strictly to the asked signal",
+            "Save it and tell it as a separate story later",
+            "Mention it briefly — it's real Leadership signal"
+          ],
+          "answerIndex": 3,
+          "explanation": "One strong story usually hits several signal areas. Keep the requested one at the center, and surface the others briefly as threads they can follow up on."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Each one stands alone. What's the candidate getting wrong, or what's being tested?",
+      "questions": [
+        {
+          "prompt": "Opening line of a conflict answer:",
+          "snippet": "\"Honestly, I'm not really one to create conflict — I get along with pretty much everyone.\"",
+          "options": [
+            "It's too short — they should add more context",
+            "It signals avoidance — tech values healthy conflict",
+            "It's too modest — they should sound more confident",
+            "It's fine — it shows they're easy to work with"
+          ],
+          "answerIndex": 1,
+          "explanation": "It reads as junior, or as someone who avoids hard conversations. Interviewers want to see you initiate disagreement constructively, not stay out of it."
+        },
+        {
+          "prompt": "\"What would you do if your manager asked you to cut a feature to hit a deadline?\" What shape is this, and what does it test?",
+          "options": [
+            "Values — your philosophy on deadlines in general",
+            "Technical — how you'd re-scope the feature",
+            "Past-behavior — they want a real story about it",
+            "Hypothetical — your judgment where experience is thin"
+          ],
+          "answerIndex": 3,
+          "explanation": "Hypotheticals test reasoning. Grounding your answer in a real similar experience still helps, because it shows the judgment isn't theoretical."
+        },
+        {
+          "prompt": "A Perseverance answer:",
+          "snippet": "\"I basically lived at the office for three weeks — nights, weekends, whatever it took — and we hit the date.\"",
+          "options": [
+            "Strong — it proves real commitment to the team",
+            "Off-topic — this is actually an Ownership story",
+            "Too short — needs more detail on the hours",
+            "A martyr story — reads as poor planning, not grit"
+          ],
+          "answerIndex": 3,
+          "explanation": "Raw hours aren't the signal. Creative problem-solving under pressure is. Knowing when to change the plan, or even quit, is strong Perseverance signal too."
+        },
+        {
+          "prompt": "\"What's your biggest weakness?\"",
+          "snippet": "\"I'd say I care too much about getting things perfect.\"",
+          "options": [
+            "Too negative — they should pick something smaller",
+            "Fine, as long as they deliver it confidently",
+            "A humble-brag — no real downside, no real Growth signal",
+            "Ideal — it's honest without hurting their chances"
+          ],
+          "answerIndex": 2,
+          "explanation": "Growth signal comes from a real mistake, a specific lesson, and changed behavior afterward. Avoid the other extreme too: a mistake so basic for your level that it raises maturity doubts."
+        },
+        {
+          "prompt": "Two candidates describe the same project:",
+          "snippet": "A: \"We aligned on the proposal.\"\nB: \"I messaged the tech lead directly given how sensitive it was, then presented to the whole team once we were aligned.\"",
+          "options": [
+            "A — B over-explains a minor detail",
+            "B — it shows how and when they communicated",
+            "Equal — both describe the same outcome",
+            "A — it's more concise and team-focused"
+          ],
+          "answerIndex": 1,
+          "explanation": "Communication is scored on the *how* and *when*: channel choice, audience, sequencing. \"We aligned\" hides all of it, and the \"we\" hides who did the work."
+        },
+        {
+          "prompt": "A candidate moves from a traditional enterprise to a fast-moving tech company, gives solid answers, and gets an offer one level below what they expected. Which lens most likely caused it?",
+          "options": [
+            "Question types — they misread the questions",
+            "Company values — they forgot to name them",
+            "Cultural assessment — behaviors didn't read right there",
+            "Signal areas — the answers lacked real signal"
+          ],
+          "answerIndex": 2,
+          "explanation": "Interviewers unconsciously compare you to the successful people they already know. The same skill can read differently depending on how you talk about hierarchy, results, and speed vs. quality."
+        }
+      ]
+    }
+  ]
+}

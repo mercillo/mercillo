@@ -1,0 +1,173 @@
+{
+  "sections": [
+    {
+      "title": "Build the answer",
+      "intro": "You've chosen your story: you moved a team's deployments from hand-run scripts to a self-service pipeline. Now tell it. Each step is a delivery decision.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "Which opening sets Context best?",
+          "options": [
+            "\"First, a quick primer on what a CI/CD pipeline is…\"",
+            "\"Deploys took three people four hours, so we shipped monthly.\"",
+            "\"The scripts were written in 2017, then rewritten in 2019…\"",
+            "\"I reported to Dana, who reported to the platform director…\""
+          ],
+          "answerIndex": 1,
+          "explanation": "Context exists to establish stakes fast. The others are the three classic mistakes: a project history lesson, unnecessary org-chart detail, and explaining tech your interviewer already knows."
+        },
+        {
+          "prompt": "Roughly how should a 3-minute answer split its time?",
+          "options": [
+            "~30s Context, ~30s Actions, ~2 min Results",
+            "~90s Context, ~60s Actions, ~30s Learnings",
+            "~1 min Context, ~1 min Actions, ~1 min Results",
+            "~20s Context, ~2 min Actions, ~1 min Results + Learnings"
+          ],
+          "answerIndex": 3,
+          "explanation": "About 10% / 60% / 30%. Actions are where the scored signal lives, so they get the most time."
+        },
+        {
+          "prompt": "The project had three phases. How do you keep a long story easy to follow?",
+          "options": [
+            "Ask the interviewer which phase to start with",
+            "Skip the middle phase to keep it short",
+            "Preview it: \"I did three things: got buy-in, built it, rolled it out.\"",
+            "Tell everything in strict chronological order"
+          ],
+          "answerIndex": 2,
+          "explanation": "The Table of Contents technique. It lets the listener track where you are, shows organized thinking, and gives you a way back if you're interrupted. Name each theme as a conclusion, not just a topic."
+        },
+        {
+          "prompt": "Which Actions sentence carries the most signal?",
+          "options": [
+            "\"I prototyped it on one service to win over the skeptics.\"",
+            "\"The pipeline was assigned to me after planning.\"",
+            "\"We built a new pipeline and rolled it out.\"",
+            "\"I worked on the deployment pipeline project.\""
+          ],
+          "answerIndex": 0,
+          "explanation": "It's specific, it's an \"I\" sentence, and it shows a decision with a reason behind it. \"We\" erases your part, \"was assigned\" makes the work sound like it happened to you, and \"worked on\" says nothing."
+        },
+        {
+          "prompt": "You've spent 40 seconds on how you tuned build caching, and the interviewer's \"mm-hm\"s are getting shorter. What now?",
+          "options": [
+            "Back up and re-explain the caching more simply",
+            "Push through — the detail proves your expertise",
+            "Ask if they'd like the full technical breakdown",
+            "Offer it as a follow-up and move to the next action"
+          ],
+          "answerIndex": 3,
+          "explanation": "The 30-second rule: if no new action has come in 30 seconds, you're stuck on one point. In an interview, a short \"mm-hm\" often means \"move on.\" Add detail only until the action is clear and credible."
+        },
+        {
+          "prompt": "There's no hard metric. Which Result works best?",
+          "options": [
+            "\"It went really well and everyone liked it.\"",
+            "\"I'm sure it saved the company a lot of money.\"",
+            "\"Any engineer could deploy in 15 minutes, so we shipped weekly.\"",
+            "\"I don't have numbers, so I'll skip the results.\""
+          ],
+          "answerIndex": 2,
+          "explanation": "A before/after comparison is one of the four fallbacks, along with stakeholder feedback, time or effort saved, and what newly became possible. Never skip Results, and never make up a number."
+        },
+        {
+          "prompt": "Which Learning lands best?",
+          "options": [
+            "\"I learned that communication is really important.\"",
+            "\"I learned that pipelines are complex systems.\"",
+            "\"I'd bring on-call in at design time — they caught a rollback gap late.\"",
+            "\"Honestly, I wouldn't change anything about it.\""
+          ],
+          "answerIndex": 2,
+          "explanation": "It's specific, it admits a real mistake, and it's something you'd actually do differently. \"Nothing to change\" is a red flag, and generic lessons don't stick with anyone."
+        },
+        {
+          "prompt": "They ask: \"What was the hardest part?\" Why should this not catch you off guard?",
+          "options": [
+            "You can turn it around and ask what they think",
+            "Your Results already answered it in full",
+            "It's rare — interviewers usually skip follow-ups",
+            "It's one of four follow-ups to prepare for every story"
+          ],
+          "answerIndex": 3,
+          "explanation": "What would you do differently? What was the hardest part? How did you measure success? What happened after? Expect them for every core story, and have answers ready."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Each one stands alone.",
+      "questions": [
+        {
+          "prompt": "Why does CARL replace STAR in this course?",
+          "options": [
+            "It drops Results, since metrics are often missing",
+            "It's shorter, so stories stay under a minute",
+            "It adds Learnings, and merges Situation and Task",
+            "It puts Actions first so interviewers stay engaged"
+          ],
+          "answerIndex": 2,
+          "explanation": "STAR has no place for reflection, which is essential for senior roles, and Situation and Task blur together in practice anyway."
+        },
+        {
+          "prompt": "A candidate's Context:",
+          "snippet": "\"So this system was originally built in 2016 by a contractor, then in 2018 the team tried to migrate it, which failed because of a reorg, and then in 2020…\"",
+          "options": [
+            "Good — the history explains why it was hard",
+            "Too vague — it needs exact dates and names",
+            "The project history lesson — cut to the stakes",
+            "Fine, as long as it stays under two minutes"
+          ],
+          "answerIndex": 2,
+          "explanation": "Context should be the minimum needed to make your Actions make sense, about 30-45 seconds. A timeline the listener doesn't need delays the signal, and their attention drifts."
+        },
+        {
+          "prompt": "Your favorite project is long, and this interviewer interrupts a lot. What helps?",
+          "options": [
+            "Speak faster to fit everything in",
+            "Pick a shorter, lower-scope story instead",
+            "Ask them to hold questions until the end",
+            "Front-load the Results so the outcome lands early"
+          ],
+          "answerIndex": 3,
+          "explanation": "If deep follow-ups might keep you from reaching the end, put the outcome up front. Then the interruptions add to the story instead of cutting it off."
+        },
+        {
+          "prompt": "One story, three questions: perseverance, ownership, communication. How do you reuse it?",
+          "options": [
+            "Never reuse a story within the same interview",
+            "Tell it exactly the same way every time",
+            "Change the facts slightly to fit each question",
+            "Foreground a different part each time; mention the rest briefly"
+          ],
+          "answerIndex": 3,
+          "explanation": "Like different movie trailers cut from the same footage. Change what you emphasize, never the facts."
+        },
+        {
+          "prompt": "Your interviewer is a hiring manager who doesn't write code. How do you adjust?",
+          "options": [
+            "Skip the technical parts entirely",
+            "Stay at the decisions and trade-offs level",
+            "Explain every technical term from scratch",
+            "Go deeper on the technical details to impress"
+          ],
+          "answerIndex": 1,
+          "explanation": "Match the detail to the listener. Go deeper with a peer engineer; with a manager, stay at the level of decisions and their consequences. You keep the substance, just at a different altitude."
+        },
+        {
+          "prompt": "Which is the stronger Action?",
+          "snippet": "A: \"I debugged the issue.\"\nB: \"I added distributed tracing and found the Redis pool was exhausted at peak.\"",
+          "options": [
+            "Equal — both describe the same action",
+            "A — B is too technical for an interview",
+            "A — it's concise and keeps the story moving",
+            "B — the specificity is itself evidence of skill"
+          ],
+          "answerIndex": 3,
+          "explanation": "Specific actions show how you work, so the interviewer can see you'd do it again. Vague ones could describe anybody."
+        }
+      ]
+    }
+  ]
+}

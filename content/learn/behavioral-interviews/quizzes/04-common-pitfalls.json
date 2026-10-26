@@ -1,0 +1,164 @@
+{
+  "sections": [
+    {
+      "title": "Audit a draft",
+      "intro": "A friend asks you to review their written answer to \"Tell me about a challenging project\" before their interview. Go through it the way the self-audit checklist does.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "Their draft spends 80% of its length on the system architecture. What's the first problem?",
+          "options": [
+            "It's fine — technical depth always scores well",
+            "It misses what's being assessed — \"challenging\" means Perseverance",
+            "It's too short — architecture needs even more depth",
+            "It should open with the architecture diagram"
+          ],
+          "answerIndex": 1,
+          "explanation": "Pitfall #1. It feels safer to show competence than to talk about the hard part, but the hard part is what's being scored. Pause, name the signal being asked for, and then answer it."
+        },
+        {
+          "prompt": "You count pronouns in their Actions:",
+          "snippet": "\"We decided to use Redis. We built a new service. We shipped on time.\"",
+          "options": [
+            "Fine — \"I\" would sound arrogant here",
+            "The \"We\" Disease — say what *they* decided and built",
+            "Good — it shows they're a team player",
+            "Too short — add more \"we\" detail"
+          ],
+          "answerIndex": 1,
+          "explanation": "The interviewer is evaluating them, not their team. \"I proposed Redis because reads outnumbered writes 100:1\" is precise about their part, and interviewers don't read precision as arrogance."
+        },
+        {
+          "prompt": "Their Actions section, in full:",
+          "snippet": "\"I built the filter and shipped it on time.\"",
+          "options": [
+            "Not enough actions — no visible judgment or technique",
+            "Fine, if the Results section is strong",
+            "Perfect — concise and outcome-focused",
+            "Too much detail for an Actions section"
+          ],
+          "answerIndex": 0,
+          "explanation": "Pitfall #2. A chain like \"found N+1 queries → rewrote them as a single JOIN → p95 went from 3.2s to 400ms → support tickets dropped 60%\" shows how they work. One summary line shows nothing they could repeat."
+        },
+        {
+          "prompt": "You time their Context read aloud: 75 seconds of team history and reporting lines. What do you suggest?",
+          "options": [
+            "Cut to ~20 seconds — keep only the stakes",
+            "Keep it, but speak faster through it",
+            "Keep it — the history makes the stakes clear",
+            "Move the history to the end as a recap"
+          ],
+          "answerIndex": 0,
+          "explanation": "Pitfall #3: about 10% of the story. Interpersonal detail can earn its place in a conflict story, but only when it serves the Actions."
+        },
+        {
+          "prompt": "The ending:",
+          "snippet": "\"We shipped on time, the metrics went up, and everyone was thrilled.\"",
+          "options": [
+            "Too negative — they should sound more excited",
+            "Ideal — a clean ending leaves a strong impression",
+            "A fairy tale ending — add the real obstacle or flaw",
+            "Fine, as long as the metrics are specific"
+          ],
+          "answerIndex": 2,
+          "explanation": "Pitfall #6. With no friction at all, it sounds like they weren't close to the real work, or like they're hiding something. A real obstacle also gives the Learnings something to land on."
+        },
+        {
+          "prompt": "One line in their story says \"my manager assigned me this project.\" They're interviewing for a senior role. Why flag it?",
+          "options": [
+            "It invites an uncharitable read: \"do they wait to be told?\"",
+            "It's dishonest — they should say they chose it",
+            "It's fine — it shows they follow direction",
+            "It's too much org-chart detail"
+          ],
+          "answerIndex": 0,
+          "explanation": "Senior interviewers tend to fill gaps with negative assumptions. Thinking defensively means turning straight to what *you* did with the assignment, or leaving out the framing if it adds nothing."
+        },
+        {
+          "prompt": "They say: \"It's all written down, I know it cold, I don't need to say it out loud.\" Your response?",
+          "options": [
+            "Agreed — written prep is enough",
+            "Practicing out loud is what makes delivery match the page",
+            "Reading it once more silently will do",
+            "They should memorize it word for word"
+          ],
+          "answerIndex": 1,
+          "explanation": "Pitfall #7. Candidates who've rehearsed out loud beat candidates with better material who haven't. Practice the key points, not exact wording, or it'll sound robotic."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Match the symptom to the pitfall, or the signal-area check that fails.",
+      "questions": [
+        {
+          "prompt": "A Staff-level candidate tells a conflict story about a disagreement with a peer over variable naming. Which check fails?",
+          "options": [
+            "Involvement — they weren't central to it",
+            "Empathy — they made the peer look bad",
+            "Scope — a peer-level, low-stakes conflict reads junior",
+            "Relationship — the outcome isn't stated"
+          ],
+          "answerIndex": 2,
+          "explanation": "Conflict scope should match the target level. For Staff, look for disagreements with a manager, across orgs, or over system design and team charters."
+        },
+        {
+          "prompt": "A senior candidate says: \"I prioritized the roadmap and we hit our goals.\" What's missing?",
+          "options": [
+            "Humility — they should credit the team",
+            "A metric — they need an exact percentage",
+            "Context — they need more team background",
+            "The framework — the criteria behind the prioritizing"
+          ],
+          "answerIndex": 3,
+          "explanation": "At senior levels and up, they want to see *how* you think, so they can tell whether your decision process would work in their org. Name the criteria and the trade-offs."
+        },
+        {
+          "prompt": "A Leadership story covers only the candidate's own code. Which check fails?",
+          "options": [
+            "It's fine — strong code is leadership by example",
+            "It needs a bigger team to count as leadership",
+            "It doesn't show how they enabled others to do good work",
+            "It's too technical for a Leadership question"
+          ],
+          "answerIndex": 2,
+          "explanation": "Leadership signal is about creating the conditions for others: mentoring, unblocking, building consensus. Say it explicitly. Don't leave it for the interviewer to infer."
+        },
+        {
+          "prompt": "A Growth story:",
+          "snippet": "\"My mistake was that I deleted the production database because I didn't know what a WHERE clause was.\"",
+          "options": [
+            "Ideal — a big, honest mistake is the best Growth story",
+            "Too basic for the level — it raises maturity doubts",
+            "Too vague — it needs exact downtime numbers",
+            "Fine, as long as they say they're sorry"
+          ],
+          "answerIndex": 1,
+          "explanation": "The mistake should be real but not damaging to your credibility. Pick one that shows growth in skill, and ideally show the lesson applied later."
+        },
+        {
+          "prompt": "A candidate's stories regularly run 5-6 minutes, with backtracking (\"wait, before that…\"). Most likely cause?",
+          "options": [
+            "Stories that are too low in scope",
+            "Not enough out-loud practice",
+            "Too many \"I\" statements",
+            "Interviewers who ask too many questions"
+          ],
+          "answerIndex": 1,
+          "explanation": "Overlong answers, losing your place, tangents, filler words, and uneven pacing are all signs of too little rehearsal, not of weak material."
+        },
+        {
+          "prompt": "An Ownership story ends with \"…and then I handed it off to the other team.\" Which check fails?",
+          "options": [
+            "Too recent — ownership stories should be older",
+            "Wrong signal — handoffs are Communication",
+            "Too much \"I\" — it sounds like they did it alone",
+            "No measured result — did the fix actually work?"
+          ],
+          "answerIndex": 3,
+          "explanation": "Ownership means driving it end-to-end, including checking that it worked and explaining why those metrics mattered. Flagging a problem and handing it off is only half the job."
+        }
+      ]
+    }
+  ]
+}

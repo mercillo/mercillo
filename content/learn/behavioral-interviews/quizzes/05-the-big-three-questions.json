@@ -1,0 +1,174 @@
+{
+  "sections": [
+    {
+      "title": "The first ten minutes",
+      "intro": "The call starts. These three questions come up in nearly every behavioral round, usually in this order. Play it through.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "\"So, tell me about yourself.\" What's the right structure?",
+          "options": [
+            "Every job in order, oldest to newest, ~5 min",
+            "How you got into tech as a kid, then today",
+            "\"It's all on my resume\" — then ask a question",
+            "Summary → 2-3 accomplishments → why this role, ~60s"
+          ],
+          "answerIndex": 3,
+          "explanation": "Personal summary, accomplishments, then a forward-looking statement, in 30-90 seconds. The others are the classic mistakes: the History Lesson, the Childhood Origin Story, and Less Is Not More."
+        },
+        {
+          "prompt": "Which accomplishment belongs in your TMAY?",
+          "options": [
+            "Your academic GPA and graduation honors",
+            "The full CARL story of your best project",
+            "One line that previews your flagship project",
+            "A list of every tool and language you know"
+          ],
+          "answerIndex": 2,
+          "explanation": "Keep each to a sentence, focused on business impact. Ideally one overlaps with your favorite-project answer, which steers the next question toward your strongest material."
+        },
+        {
+          "prompt": "You left your last job partly out of frustration with leadership. In your forward-looking statement, you say:",
+          "options": [
+            "Nothing — skip the forward-looking part",
+            "That you needed to get out quickly",
+            "What you want next, and why this role fits it",
+            "That your last company was badly run"
+          ],
+          "answerIndex": 2,
+          "explanation": "Talk about what you're moving toward, not what you're leaving. Criticizing a former employer reads as a judgment flag, however justified the frustration was."
+        },
+        {
+          "prompt": "Next: \"What's the most impactful thing you've worked on?\" Which story do you tell?",
+          "options": [
+            "The biggest project your company ever ran",
+            "Whichever story you told most recently",
+            "A different story than your favorite project",
+            "Your flagship story — the same one \"favorite\" would get"
+          ],
+          "answerIndex": 3,
+          "explanation": "\"Favorite,\" \"most impactful,\" and \"ambiguous problem you solved\" are the same question underneath. Have one flagship story, picked for Impact → Scope → Personal Contribution."
+        },
+        {
+          "prompt": "Your choices: a huge company-wide launch where you owned one small piece, or a smaller project you fully led. Which is the flagship?",
+          "options": [
+            "Neither — pick whichever is most recent",
+            "The smaller one you led — Personal Contribution wins",
+            "The big launch — Scope always wins",
+            "Both — tell them back to back"
+          ],
+          "answerIndex": 1,
+          "explanation": "If no project scores high on all three, put Personal Contribution first. They need to see your decisions, and a peripheral role in a big project has none to show."
+        },
+        {
+          "prompt": "Then: \"Tell me about a time you had a conflict.\" Which story do you choose?",
+          "options": [
+            "High stakes, you were central, your position was defensible",
+            "Low stakes, so it can't be held against you",
+            "One where you were clearly wrong, to show humility",
+            "One you watched happen between two other people"
+          ],
+          "answerIndex": 0,
+          "explanation": "The stakes are a scope signal, central involvement shows your actions, and a defensible position is lower risk. If they explicitly ask for a time you were *wrong*, pick one where your initial view was reasonable given what you knew at the time."
+        },
+        {
+          "prompt": "Your story ends: \"…and we went with the hybrid approach.\" What's missing?",
+          "options": [
+            "Who was ultimately right in the end",
+            "How the relationship stood afterward",
+            "The exact technical spec of the hybrid",
+            "Nothing — the decision is the result"
+          ],
+          "answerIndex": 1,
+          "explanation": "The Result has to include the relationship, ideally with proof you worked well together later. Companies are trying hard not to hire someone who's difficult to work with."
+        },
+        {
+          "prompt": "Finally: \"Any questions for me?\" Which is the strongest?",
+          "options": [
+            "\"What's the salary range and PTO policy?\"",
+            "\"So — how do you think I did?\"",
+            "\"No, I think you covered everything.\"",
+            "\"What's the hardest problem this team faces this year?\""
+          ],
+          "answerIndex": 3,
+          "explanation": "Prepare 3-5 questions for each interviewer, matched to who they are. Save compensation for the recruiter. \"How did I do?\" puts them in an awkward spot, and \"no questions\" wastes the last chance to show interest."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Each one stands alone.",
+      "questions": [
+        {
+          "prompt": "A TMAY opener:",
+          "snippet": "\"It's honestly been my life's dream to work at a company like yours.\"",
+          "options": [
+            "Too short — expand on why it's a dream",
+            "Flattery — it spends the most attentive seconds on nothing",
+            "Strong — enthusiasm is what they're looking for",
+            "Fine, as long as it's sincere"
+          ],
+          "answerIndex": 1,
+          "explanation": "The first 20 seconds set the tone, and they're when the interviewer is paying closest attention. Spend them on the summary that steers toward your best material."
+        },
+        {
+          "prompt": "A candidate had a 6-month gap. Best way to handle it in TMAY?",
+          "options": [
+            "Briefly address skill atrophy: what you learned meanwhile",
+            "Explain the personal reasons in full detail",
+            "Apologize for it at the start",
+            "Leave it out and hope nobody asks"
+          ],
+          "answerIndex": 0,
+          "explanation": "Tell the story yourself, briefly, and answer the concern behind it. For a gap, that's skill atrophy; for a layoff, performance risk; for short stints, commitment."
+        },
+        {
+          "prompt": "A conflict story told like this:",
+          "snippet": "\"The PM and I had a small difference of opinion, and we quickly found common ground.\"",
+          "options": [
+            "Over-sanitized — no believable friction or emotion",
+            "Ideal — calm and professional throughout",
+            "Too long — conflict stories should be brief",
+            "Fine, if they add a metric at the end"
+          ],
+          "answerIndex": 0,
+          "explanation": "If someone was genuinely upset, say so, in an even, factual tone. That's what proves you can handle charged situations. Sanding the friction off removes the evidence."
+        },
+        {
+          "prompt": "In a conflict, the candidate escalated straight to their manager without talking to the other engineer first. How does this read?",
+          "options": [
+            "Well — managers should resolve conflicts",
+            "Neutral — the channel doesn't matter",
+            "Poorly — go to the source before escalating",
+            "Well — it shows respect for hierarchy"
+          ],
+          "answerIndex": 2,
+          "explanation": "Tech companies look for people who go directly to the source and are willing to be assertive. Bring in more people at the right time, not first."
+        },
+        {
+          "prompt": "Where can a real conflict story come from, if there was no interpersonal drama?",
+          "options": [
+            "Tech choices, priorities, timelines, resources, process",
+            "Nowhere — say you don't have conflicts",
+            "Only fights with a manager count",
+            "Only disputes that went to HR count"
+          ],
+          "answerIndex": 0,
+          "explanation": "Database choices, features vs. tech debt, shipping vs. safety, resource allocation, introducing new tooling against resistance. These are all legitimate, and often better, conflict stories."
+        },
+        {
+          "prompt": "A senior candidate's forward-looking statement:",
+          "snippet": "\"I'm open to really anything, whatever the team needs.\"",
+          "options": [
+            "Fine — the forward-looking part doesn't matter",
+            "Too specific — keep it even more open",
+            "Ideal — flexibility is always valued",
+            "Too deferential — senior candidates should name what they want"
+          ],
+          "answerIndex": 3,
+          "explanation": "The more senior you are, the more confident this statement should be about what you're looking for. Vague openness reads as not knowing your own direction."
+        }
+      ]
+    }
+  ]
+}

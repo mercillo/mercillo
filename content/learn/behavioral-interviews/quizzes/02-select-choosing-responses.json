@@ -1,0 +1,150 @@
+{
+  "sections": [
+    {
+      "title": "Pick the story",
+      "intro": "\"Tell me about the project you're proudest of.\" You have three candidates in your catalog. Choose the way you would in the room.",
+      "sequential": true,
+      "questions": [
+        {
+          "prompt": "Why build a story catalog before the interview at all?",
+          "options": [
+            "So the interviewer sees a list of your projects",
+            "So you never have to reuse the same story twice",
+            "So you can memorize each answer word for word",
+            "So picking a story is lookup, not invention, under load"
+          ],
+          "answerIndex": 3,
+          "explanation": "Live, you're already reading the interviewer, managing your impression, and structuring the answer. Searching your whole career on the spot uses up working memory you don't have to spare."
+        },
+        {
+          "prompt": "Your options: (A) a platform migration you drove across three teams over two quarters; (B) a clever caching fix last month; (C) a team-offsite you organized. Which criterion do you apply *first*?",
+          "options": [
+            "Relevance — the closest literal match to \"proud\"",
+            "Uniqueness — the story nobody else would tell",
+            "Recency — the most recent story carries the most weight",
+            "Scope — the biggest box of breadth, time, and impact"
+          ],
+          "answerIndex": 3,
+          "explanation": "The order is Scope → Relevance → Uniqueness → Recency. \"Proudest\" isn't about how you feel. It's a request for your high-water mark."
+        },
+        {
+          "prompt": "So you pick A. Why does Scope beat Recency here, even though B happened last month?",
+          "options": [
+            "They're assessing your high-water mark, not your latest work",
+            "Recent stories are often viewed as less reliable",
+            "Older stories have more measurable results",
+            "Recency only matters for junior candidates"
+          ],
+          "answerIndex": 0,
+          "explanation": "They want the ceiling of what you can do. Recency still counts, so be cautious with stories 3-5 years old and generally avoid ones 6+ years old, but it's last in the order."
+        },
+        {
+          "prompt": "Later: \"Tell me about a conflict.\" Your migration story had a real disagreement in it. Your only other conflict story is a minor code-style spat. What do you do?",
+          "options": [
+            "Tell the offsite story and reframe it as conflict",
+            "Reuse the migration, foregrounding the conflict",
+            "Tell the code-style spat — you haven't used it yet",
+            "Say you don't have a good conflict example"
+          ],
+          "answerIndex": 1,
+          "explanation": "Uniqueness matters, but not more than scope and relevance. Your weakest conflict story doesn't beat a strong one just because it's new to this interviewer."
+        },
+        {
+          "prompt": "In the migration, a senior engineer made the final architecture calls; you drove the proof-of-concept. How do you describe your role?",
+          "options": [
+            "Name exactly what you drove, and who made the final call",
+            "Leave the senior engineer out to keep it simple",
+            "Say you led it — the PoC shaped the whole thing",
+            "Say \"we\" throughout so nobody's role is unclear"
+          ],
+          "answerIndex": 0,
+          "explanation": "Inflating breaks down under follow-up questions, because you won't have the details. An honest description (\"I drove the PoC that shaped the approach; they made the service-boundary calls\") is credible and still shows your impact."
+        },
+        {
+          "prompt": "Another question asks about leading a team through a reorg. You've never done that. Best move?",
+          "options": [
+            "Adapt a story and fill in the parts you don't have",
+            "Tell an unrelated story that shows leadership",
+            "Ask to skip the question and move on",
+            "Say so, then answer it as a hypothetical from related work"
+          ],
+          "answerIndex": 3,
+          "explanation": "\"I haven't led at that scale yet, but here's how I'd approach it, based on…\" is honest and still shows judgment. Made-up details are the fastest way to lose an interviewer's trust."
+        }
+      ]
+    },
+    {
+      "title": "Spot the problem",
+      "intro": "Each one stands alone.",
+      "questions": [
+        {
+          "prompt": "A candidate's catalog has five core stories, all technically complex, all from the same project. What's the gap?",
+          "options": [
+            "Too many core stories — three is the maximum",
+            "Nothing — one deep project is the ideal catalog",
+            "Signal coverage — they likely lack conflict, growth, etc.",
+            "Too technical — stories should avoid technical detail"
+          ],
+          "answerIndex": 2,
+          "explanation": "Core stories are your best material. Additional stories exist to fill the signal areas your core stories don't cover. Check each of the 8 areas and journal against the ones that are thin."
+        },
+        {
+          "prompt": "You have two strong, roughly equal conflict stories. What technique fits?",
+          "snippet": "\"I have two examples — one a technical architecture disagreement, one about resource allocation with my manager. Which is more useful?\"",
+          "options": [
+            "Over-preparation — it sounds rehearsed",
+            "The Menu Technique — offer a choice, used sparingly",
+            "Table of Contents — previewing your story's themes",
+            "A stalling tactic — pick one and commit instead"
+          ],
+          "answerIndex": 1,
+          "explanation": "It shows depth, buys a moment to think, and makes sure you deliver the signal they actually want. Used every time, it becomes a crutch."
+        },
+        {
+          "prompt": "A candidate interviewing with a frontend-heavy panel has two equal-scope stories: one backend, one frontend. Which criterion breaks the tie?",
+          "options": [
+            "Uniqueness — pick whichever is less common",
+            "Recency — pick whichever happened later",
+            "Scope — they're equal, so it's a coin flip",
+            "Relevance — the audience shapes what resonates"
+          ],
+          "answerIndex": 3,
+          "explanation": "Relevance includes context: the role, the company, and who's interviewing. When everything else is equal, the story that speaks to the listener's world wins."
+        },
+        {
+          "prompt": "\"Tell me about a failure.\" Candidate A picks a vague, low-stakes miss. Candidate B picks a launch that slipped a month with real customer impact. Who chose better?",
+          "options": [
+            "A — low stakes keep the failure safe to discuss",
+            "Neither — never tell a real failure story",
+            "B — real consequences deliver more real signal",
+            "A — vagueness avoids follow-up questions"
+          ],
+          "answerIndex": 2,
+          "explanation": "Relevance is a spectrum. Real stakes make the recovery and the lesson believable. Pick a failure that shows growth in skill, not a flaw in character."
+        },
+        {
+          "prompt": "A candidate's best story is seven years old. They're mid-level. Risk?",
+          "options": [
+            "It's only a risk for very senior candidates",
+            "None — older stories show long experience",
+            "Interviewers can't verify older stories",
+            "Interviewers wonder what they've done since"
+          ],
+          "answerIndex": 3,
+          "explanation": "Stories 6+ years old invite \"what have you done lately?\" Senior candidates have more leeway, and a career break is a clear reason, but the default is recent material."
+        },
+        {
+          "prompt": "Where should each catalog entry's Actions focus?",
+          "options": [
+            "What *you* did — designing, aligning, deciding, shipping",
+            "The timeline of the project, phase by phase",
+            "What the team accomplished as a whole",
+            "The technical architecture, in full detail"
+          ],
+          "answerIndex": 0,
+          "explanation": "The template captures your actions across every dimension, including non-technical ones like aligning and communicating. Thinking and deciding count as actions too."
+        }
+      ]
+    }
+  ]
+}
