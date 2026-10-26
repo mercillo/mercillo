@@ -1,21 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import type { Quiz, QuizQuestion } from "@/types";
+import type { Quiz, QuizQuestion, QuizSection } from "@/types";
 
-type Section = {
-  id: string;
-  label: string;
-  questions: QuizQuestion[];
-};
+type Answers = Record<string, number>;
 
 export default function Quiz({ quiz }: { quiz: Quiz }) {
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Answers>({});
 
-  const sections: Section[] = [
-    { id: "content", label: "Content quiz", questions: quiz.content },
-    { id: "terms", label: "Terms quiz", questions: quiz.terms },
-  ].filter((section) => section.questions.length > 0);
+  const sections = quiz.sections.filter(
+    (section) => section.questions.length > 0
+  );
 
   if (sections.length === 0) {
     return (
@@ -37,10 +32,7 @@ export default function Quiz({ quiz }: { quiz: Quiz }) {
   };
 
   return (
-    <section
-      aria-label="Quiz"
-      className="mt-16 border-t border-line pt-12"
-    >
+    <section aria-label="Quiz" className="mt-16 border-t border-line pt-12">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Quiz</h2>
         <button
@@ -53,42 +45,78 @@ export default function Quiz({ quiz }: { quiz: Quiz }) {
         </button>
       </div>
 
-      {sections.map((section) => {
-        const correct = section.questions.filter(
-          (question, index) =>
-            answers[`${section.id}-${index}`] === question.answerIndex
-        ).length;
-        return (
-          <div key={section.id} className="mt-8">
-            <h3 className="text-base font-semibold text-foreground">
-              {section.label}{" "}
-              <span className="font-normal text-subtle">
-                {correct}/{section.questions.length}
-              </span>
-            </h3>
-            {section.questions.map((question, index) => {
-              const questionId = `${section.id}-${index}`;
-              return (
-                <Question
-                  key={questionId}
-                  question={question}
-                  selected={answers[questionId]}
-                  onSelect={(optionIndex) => select(questionId, optionIndex)}
-                />
-              );
-            })}
-          </div>
-        );
-      })}
+      {sections.map((section, sectionIndex) => (
+        <Section
+          key={section.title}
+          id={`section-${sectionIndex}`}
+          section={section}
+          answers={answers}
+          onSelect={select}
+        />
+      ))}
     </section>
   );
 }
 
+function Section({
+  id,
+  section,
+  answers,
+  onSelect,
+}: {
+  id: string;
+  section: QuizSection;
+  answers: Answers;
+  onSelect: (questionId: string, optionIndex: number) => void;
+}) {
+  const questionId = (index: number) => `${id}-${index}`;
+  const correct = section.questions.filter(
+    (question, index) => answers[questionId(index)] === question.answerIndex
+  ).length;
+  const firstUnanswered = section.questions.findIndex(
+    (_, index) => answers[questionId(index)] === undefined
+  );
+  const visibleCount =
+    section.sequential && firstUnanswered !== -1
+      ? firstUnanswered + 1
+      : section.questions.length;
+  const hiddenCount = section.questions.length - visibleCount;
+
+  return (
+    <div className="mt-10">
+      <h3 className="text-base font-semibold text-foreground">
+        {section.title}{" "}
+        <span className="font-normal text-subtle">
+          {correct}/{section.questions.length}
+        </span>
+      </h3>
+      {section.intro && (
+        <p className="mt-2 text-sm text-muted">{renderInline(section.intro)}</p>
+      )}
+      {section.questions.slice(0, visibleCount).map((question, index) => (
+        <Question
+          key={questionId(index)}
+          step={section.sequential ? index + 1 : undefined}
+          question={question}
+          selected={answers[questionId(index)]}
+          onSelect={(optionIndex) => onSelect(questionId(index), optionIndex)}
+        />
+      ))}
+      <p aria-live="polite" className="mt-4 text-sm text-subtle">
+        {hiddenCount > 0 &&
+          `Answer to reveal the next step · ${hiddenCount} to go`}
+      </p>
+    </div>
+  );
+}
+
 function Question({
+  step,
   question,
   selected,
   onSelect,
 }: {
+  step?: number;
   question: QuizQuestion;
   selected: number | undefined;
   onSelect: (optionIndex: number) => void;
@@ -98,7 +126,17 @@ function Question({
 
   return (
     <div className="mt-6 rounded-lg border border-line bg-surface p-5">
-      <p className="font-medium text-foreground">{renderPrompt(question.prompt)}</p>
+      {step !== undefined && (
+        <p className="text-xs tracking-[0.2em] text-subtle">STEP {step}</p>
+      )}
+      <p className="font-medium text-foreground">
+        {renderInline(question.prompt)}
+      </p>
+      {question.snippet && (
+        <pre className="mt-3 overflow-x-auto rounded-md border border-line bg-background p-3 text-xs leading-relaxed text-foreground">
+          <code>{question.snippet}</code>
+        </pre>
+      )}
       <div className="mt-4 grid gap-2">
         {question.options.map((option, index) => {
           const isAnswer = index === question.answerIndex;
@@ -119,7 +157,7 @@ function Question({
               aria-pressed={isSelected}
               className={`rounded-md border px-4 py-2.5 text-left text-sm text-muted transition-colors ${stateClass}`}
             >
-              {option}
+              {renderInline(option)}
             </button>
           );
         })}
@@ -131,21 +169,35 @@ function Question({
           </span>
         )}
         {answered && question.explanation && (
-          <span className="text-muted"> {question.explanation}</span>
+          <span className="text-muted">
+            {" "}
+            {renderInline(question.explanation)}
+          </span>
         )}
       </p>
     </div>
   );
 }
 
-function renderPrompt(prompt: string) {
-  return prompt.split("**").map((part, index) =>
-    index % 2 === 1 ? (
-      <strong key={index} className="text-foreground">
-        {part}
-      </strong>
-    ) : (
-      <span key={index}>{part}</span>
-    )
-  );
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code
+          key={index}
+          className="rounded bg-background px-1 py-0.5 text-xs text-accent"
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return <span key={index}>{part}</span>;
+  });
 }

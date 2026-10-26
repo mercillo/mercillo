@@ -32,7 +32,23 @@ export async function getQuiz(
 function isValidQuiz(value: unknown): value is Quiz {
   if (typeof value !== "object" || value === null) return false;
   const quiz = value as Record<string, unknown>;
-  return isQuestionArray(quiz.content) && isQuestionArray(quiz.terms);
+  return Array.isArray(quiz.sections) && quiz.sections.every(isValidSection);
+}
+
+function isOptionalString(value: unknown): boolean {
+  return value === undefined || typeof value === "string";
+}
+
+function isValidSection(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const section = value as Record<string, unknown>;
+  return (
+    typeof section.title === "string" &&
+    isOptionalString(section.intro) &&
+    (section.sequential === undefined ||
+      typeof section.sequential === "boolean") &&
+    isQuestionArray(section.questions)
+  );
 }
 
 function isQuestionArray(value: unknown): boolean {
@@ -43,6 +59,8 @@ function isQuestionArray(value: unknown): boolean {
     return (
       typeof q.prompt === "string" &&
       q.prompt.length > 0 &&
+      isOptionalString(q.snippet) &&
+      isOptionalString(q.explanation) &&
       Array.isArray(q.options) &&
       q.options.length >= 2 &&
       q.options.every((option) => typeof option === "string") &&
@@ -59,8 +77,13 @@ export function buildQuiz(markdown: string): Quiz {
   const { bodyLines, termEntries } = splitSections(lines);
   const termPool = collectBoldTerms(bodyLines);
   return {
-    content: buildContentQuestions(bodyLines, termPool),
-    terms: buildTermQuestions(termEntries),
+    sections: [
+      {
+        title: "Content quiz",
+        questions: buildContentQuestions(bodyLines, termPool),
+      },
+      { title: "Terms quiz", questions: buildTermQuestions(termEntries) },
+    ],
   };
 }
 

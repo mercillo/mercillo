@@ -43,12 +43,19 @@ export type Lecture = LectureSummary & {
 
 export type QuizQuestion = {
   prompt: string;
+  snippet?: string;
   options: string[];
   answerIndex: number;
   explanation?: string;
 };
 
+export type QuizSection = {
+  title: string;
+  intro?: string;
+  sequential?: boolean;
+  questions: QuizQuestion[];
+};
+
 export type Quiz = {
-  content: QuizQuestion[];
-  terms: QuizQuestion[];
+  sections: QuizSection[];
 };
